@@ -69,10 +69,12 @@ qwtwc_API void qwtylabel(char* s) {
 	qwtController->ylabel(s);
 }
 
+/*
 void qwtmode(int mode) {
     if(qwtController != 0)
 	   qwtController->setmode(mode);
 }
+*/
 
 qwtwc_API 	void qwtclear() {
 	if (qwtController != 0) {

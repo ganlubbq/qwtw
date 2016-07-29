@@ -377,14 +377,12 @@ void Figure2::addLine(LineItemInfo* line) {
 		//
 	} else {
 		int sn = line->style.size();
-
 		
-
 		if (sn > 0) { //    last is always color:
 			//  set color:
 			switch (line->style[sn - 1]) {
 				case 'r':  color = Qt::red;  break;
-				case 'd': color = Qt::red;	break;
+				case 'd': color = Qt::darkRed;	break;
 				case 'k': color = Qt::black;  break;
 				case 'w': color = Qt::white;  break;
 				case 'g': color = Qt::green;  break;

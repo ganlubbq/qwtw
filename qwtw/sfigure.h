@@ -110,7 +110,7 @@ protected:
 	/** marker - related stuff
 
 	*/
-	int currentFigureMode; 
+	//int currentFigureMode; 
 	bool currentImportanceMode;
 	bool clearingAllFigures;
 	void clearFigures();

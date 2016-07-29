@@ -27,7 +27,7 @@
 XQPlots::XQPlots(QWidget * parent1): QDialog(parent1) {
 	parent = parent1;
 	cf = 0;  //cf3 = 0;
-	currentFigureMode = 0;  //  do not draw markers
+	//currentFigureMode = 2;  //  
 	clearingAllFigures = false;
 	currentImportanceMode = true;
 	//memset(ecefOrigin, 0, 3*sizeof(double));  //  this means 'not set'
@@ -53,7 +53,7 @@ XQPlots::~XQPlots() {
 }
 
 void XQPlots::setmode(int mode_) {
-    currentFigureMode = mode_;
+    //currentFigureMode = mode_;
 }
 
 void XQPlots::setImportant(bool i) {
@@ -219,14 +219,11 @@ void  XQPlots::plot(double* x, double* y, int size, const char* name,
 		figure(1);
 	}
 
-	int mode = currentFigureMode;
+	//int mode = currentFigureMode;
+	int mode = 2;
 	if(time != 0) {
 	    mode = 3;
-	} else { //  time == 0
-	    if(mode == 3) {
-		   mode = 2;
-	    }
-	}
+	} 
 
 	//it will be deleted in 'cf' destructor
 	LineItemInfo* i = new LineItemInfo(x, y, size, name, mode, time);
