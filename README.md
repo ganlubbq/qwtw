@@ -2,6 +2,7 @@
 another qwt-based 2D plotting library 
 
 ![](readme/p1.png "plot examples")
+![](readme/p2.png "plot description")
 
 
 how to build everything:
