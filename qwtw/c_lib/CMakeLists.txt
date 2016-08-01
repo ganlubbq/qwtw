@@ -51,22 +51,14 @@ if(WIN32)
 else()
 	add_definitions(-DLIN_UX)
 	addQWTLinux()
-#	set (qwtPath $ENV{qwtPath})
-#	message("qwt path = "  ${qwtPath})
-#	list(APPEND INC_DIR_LIST ${qwtPath}/include)
-
-#	list(APPEND LIB_LIST ${qwtPath}/lib/libqwt.so)  #  ncurses
 	message("LIB_LIST: "  ${LIB_LIST})
-#	list(APPEND INC_DIR_LIST "/usr/include/qwt")
 
 endif()
 libraryEnd(SHARED)
 
 # ========================================================
 addSourceFilesSimple(testSrc "source" "."  qwtwtest)
-#fillOurLibList(rLList dLList qwtwc)
 ADD_EXECUTABLE(qwtwtest ${testSrc})
-#target_link_libraries(qwtwtest ${dLList}   ${rLList} )
 target_link_libraries(qwtwtest  qwtwc )
 
 

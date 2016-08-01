@@ -6,7 +6,7 @@ another qwt-based 2D plotting library
 
 This is a [library header file](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtw_c.h)
 
-And this is a [small example how to use it](https://github.com/ig-or/qwtw/blob/master/qwtw/qwtwtest/qwtwtest.cpp)
+And this is a [small example how to use it](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtwtest.cpp)
 
 how to build everything:
 ==========================
@@ -33,6 +33,7 @@ Windows7 x64
 * mkdir release
 * cd release
 * cmake -G "NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release ../../.
+		or `cmake -G "Visual Studio 12 2013 Win64" ../../.`
 * jom -j 9
 * cd ..\..\..\..\
 * cd lib\release
