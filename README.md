@@ -3,6 +3,7 @@ another qwt-based 2D plotting library
 
 ![](readme/p1.png "plot examples")
 ![](readme/p2.png "plot description")
+![](readme/p3.png "plot examples #2")
 
 This is a [library header file](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtw_c.h)
 
