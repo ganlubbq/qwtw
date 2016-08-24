@@ -21,6 +21,10 @@ install a number of libraries:
 
 Windows7 x64
 ------------
+For `Windows7 x64` you can use an installer. You can find it here:
+		https://github.com/ig-or/qwtw/releases
+Please read its description before run `qwtwsetup.exe` .   If you do not like to use this installer, you can build everything by yourself. There is a description about it (see below), but in case `Windows` its not perfect (at least "plot on a map" feature may be not working).
+
 * install BOOST, QT, QWT, python, jom, Visual Studio, Marble packages
 * all those packages should 'coinside' with each other: for example
   QT5 should correspond your VisualStudio, and QWT and Marble -
@@ -45,6 +49,8 @@ library test should start (create 4 very simple plots)
 
 Fedora-24 x64 linux
 -------------------------
+I tested it on "empty" Fedora installation, and everything worked.
+
 *  we need latest cmake
 
        sudo dnf install cmake
@@ -77,6 +83,7 @@ Fedora-24 x64 linux
 * run test example:
 
         ./qwtwtest
+
 
 
 
