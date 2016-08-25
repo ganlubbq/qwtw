@@ -57,9 +57,7 @@ endif()
 libraryEnd(SHARED)
 
 if (UNIX)
-	if(${libType} STREQUAL SHARED) #  DLL special case:
-		install(FILES qwtw_c.h   DESTINATION include)
-	endif()
+	install(FILES qwtw_c.h   DESTINATION include)
 endif()
 
 # ========================================================
