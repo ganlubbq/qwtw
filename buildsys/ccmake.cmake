@@ -468,6 +468,14 @@ macro (commonEnd   libType)
 
 
 	endif()
+	
+	if (UNIX)
+		if(${libType} STREQUAL SHARED) #  DLL special case:
+			install(TARGETS ${PROJECT_NAME}   DESTINATION bin)
+		endif()
+	endif()
+	
+	
 endmacro()
 
 macro (programEnd)
