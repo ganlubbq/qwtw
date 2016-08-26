@@ -52,7 +52,8 @@ QTSMainWidget::QTSMainWidget(LRBuf<BQInfo, 16>* bq_) : QWidget(0, 0), bq(bq_) {
 	bool OK = false;
 	OK = connect(qts2, SIGNAL(gotNewInfo(BQInfo)), this, SLOT(onInfoSlot(BQInfo)));
 	//OK = connect(qts2, SIGNAL(gotNewInfo(int)), this, SLOT(onInfoSlot(int)));
-	xm_printf("QTSMainWidget  created \n");
+
+	//xm_printf("QTSMainWidget  created \n");
 
 }
 

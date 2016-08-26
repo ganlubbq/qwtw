@@ -203,6 +203,11 @@ long long  findClosestPoint_1(long long  i1, long long i2, double* v, double x) 
 		return 0;
 	}
 	mxat(i2 > i1);
+#ifdef _DEBUG
+	if (i2 <= i1) {
+		int itmp = 0;
+	}
+#endif
 	if (x >= v[i2]) return i2;
 	if (x <= v[i1]) return i1;
 

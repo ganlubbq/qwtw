@@ -850,23 +850,57 @@ void Figure2::onClip(double t1, double t2) {
 		return;
 	}
 
+	bool ok = false;
+
 	// do 'vertical scale':
 	double yMax = -BIGNUMBER, yMin = BIGNUMBER;
+	double xMax = -BIGNUMBER;
+	double xMin = BIGNUMBER;
+
 	for (std::list<FigureItem*>::iterator it = lines.begin(); it != lines.end(); it++) {
 		FigureItem* fi = *it;
 		LineItemInfo* i = fi->info;
 		if (!i->important) {
 			continue;
 		}
-		long long x1 = findClosestPoint_1(0, i->size - 1, i->x, t1);
-		long long x2 = findClosestPoint_1(x1, i->size - 1, i->x, t2);
-		for (long long k = x1; k < x2; k++) {
-			if (yMax < i->y[k]) { yMax = i->y[k]; 	}
-			if (yMin > i->y[k]) { yMin = i->y[k];	}
+		if (i->mode != 3) { //   'simple' line
+			if (xMax < t2) xMax = t2;
+			if (xMin > t1) xMin = t1;
+
+			//  bounds check:
+			if (i->x[0] > t2) continue;
+			if (i->x[i->size-1] < t1) continue;
+		
+			long long x1 = findClosestPoint_1(0, i->size - 1, i->x, t1);
+			long long x2 = findClosestPoint_1(x1, i->size - 1, i->x, t2);
+			for (long long k = x1; k < x2; k++) {
+				if (yMax < i->y[k]) { yMax = i->y[k]; 	}
+				if (yMin > i->y[k]) { yMin = i->y[k];	}
+			}
+			ok = true;
+		} else { //  i->more == 3:  looks like a top view plot
+			if (i->time == 0) {
+				mxat(false);
+				continue;
+			}
+			long long i1 = findClosestPoint_1(0, i->size - 1, i->time, t1);
+			long long i2 = findClosestPoint_1(i1, i->size - 1, i->time, t2);
+
+			for (long long k = i1; k < i2; k++) {
+				if (yMax < i->y[k]) {
+					yMax = i->y[k];
+				}
+				if (yMin > i->y[k]) {
+					yMin = i->y[k];
+				}
+				if (xMax < i->x[k]) xMax = i->x[k];
+				if (xMin > i->x[k]) xMin = i->x[k];
+			}
+			ok = true;
 		}
 	}
 	//plt->setAxisScale(xAxis(), x1, x2);
-	plot1->setAxisScale(plot1->xBottom, t1, t2);
+	plot1->setAxisScale(plot1->xBottom, xMin, xMax);
 	plot1->setAxisScale(plot1->yLeft, yMin, yMax);
 
 	plot1->replot(); // ?

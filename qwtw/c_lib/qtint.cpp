@@ -297,7 +297,7 @@ void startQT_2() {
 void startQWT() {
 	int ok;
 	bq = new LRBuf<BQInfo, 16>();
-    xm_printf("qwtw: 'startQWT' starting \n");
+	//xm_printf("qwtw: 'startQWT' starting \n");
 	if (qwtController == 0) {
 		qwtController = new QWController();
 	}
