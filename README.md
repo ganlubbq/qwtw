@@ -9,6 +9,8 @@ This is a [library header file](https://github.com/ig-or/qwtw/blob/master/qwtw/c
 
 And this is a [small example how to use it](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtwtest.cpp)
 
+Also, there is a `Julia language` package as a wrapper for this library: `https://github.com/ig-or/qwtwplot`
+
 how to build everything:
 ==========================
 install a number of libraries:

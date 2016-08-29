@@ -38,7 +38,11 @@ using namespace Marble;
 static bool mpWasSet = false;
 
 int setMarbleDataPath(char* p) {
+#ifdef WIN32
 	MarbleDirs::setMarbleDataPath(p/*"C:/programs/marble/data"*/);
+#else
+	MarbleDirs::setMarbleDataPath(p/*"/usr/share/marble/data"*/);
+#endif
 	return 0;
 }
 

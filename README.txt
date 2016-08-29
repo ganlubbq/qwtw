@@ -3,10 +3,13 @@ another qwt-based 2D plotting library
 
 ![](readme/p1.png "plot examples")
 ![](readme/p2.png "plot description")
+![](readme/p3.png "plot examples #2")
 
 This is a [library header file](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtw_c.h)
 
 And this is a [small example how to use it](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtwtest.cpp)
+
+Also, there is a `Julia language` package as a wrapper for this library: `https://github.com/ig-or/qwtwplot`
 
 how to build everything:
 ==========================
@@ -20,6 +23,10 @@ install a number of libraries:
 
 Windows7 x64
 ------------
+For `Windows7 x64` you can use an installer. You can find it here:
+		https://github.com/ig-or/qwtw/releases
+Please read its description before run `qwtwsetup.exe` .   If you do not like to use this installer, you can build everything by yourself. There is a description about it (see below), but in case `Windows` its not perfect (at least "plot on a map" feature may be not working).
+
 * install BOOST, QT, QWT, python, jom, Visual Studio, Marble packages
 * all those packages should 'coinside' with each other: for example
   QT5 should correspond your VisualStudio, and QWT and Marble -
@@ -44,6 +51,8 @@ library test should start (create 4 very simple plots)
 
 Fedora-24 x64 linux
 -------------------------
+I tested it on "empty" Fedora installation, and everything worked.
+
 *  we need latest cmake
 
        sudo dnf install cmake
@@ -76,6 +85,7 @@ Fedora-24 x64 linux
 * run test example:
 
         ./qwtwtest
+
 
 
 
