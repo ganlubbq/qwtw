@@ -160,6 +160,10 @@ macro (addVersionInfo curSrcList)
 	
 	# recreate build info:
 	add_custom_command(OUTPUT ${BUILD_INFO_FILE} COMMAND python ${BUILDINFO_PY_SCRIPT} ${VERSION_INFO_FILE} ${BUILD_INFO_FILE} ${ourPlatform} DEPENDS ${VERSION_INFO_FILE} COMMENT "creating ${BUILD_INFO_FILE}")
+	
+	file(STRINGS  ${VERSION_INFO_FILE} VERSION_INFO_STRING)
+	message(STATUS "version:   ${VERSION_INFO_STRING}")
+   
 endmacro ()
 
 macro (addBuildNumber)
@@ -405,9 +409,11 @@ macro (commonEnd   libType)
 	endif()
 	
 	INCLUDE_DIRECTORIES(${INC_DIR_LIST}) 
+	
 	SET_TARGET_PROPERTIES( ${PROJECT_NAME}
 		PROPERTIES    DEBUG_OUTPUT_NAME ${PROJECT_NAME}d    RELEASE_OUTPUT_NAME ${PROJECT_NAME}
 		ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${OUR_LIBRARY_DIR}/debug"  ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUR_LIBRARY_DIR}/release"
+		VERSION ${VERSION_INFO_STRING}
 	)
 	
 	if(WIN32 AND MSVC) 
@@ -472,7 +478,11 @@ macro (commonEnd   libType)
 	
 	if (UNIX)
 		if(${libType} STREQUAL SHARED) #  DLL special case:
-			install(TARGETS ${PROJECT_NAME}   DESTINATION bin)
+			if( CMAKE_SIZEOF_VOID_P MATCHES 8 )
+				install(TARGETS ${PROJECT_NAME}   DESTINATION lib64)
+			else()
+				install(TARGETS ${PROJECT_NAME}   DESTINATION lib)
+			endif()
 		endif()
 	endif()
 	
