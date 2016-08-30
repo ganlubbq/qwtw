@@ -58,6 +58,7 @@ make install DESTDIR=%{buildroot}
 %license LICENSE
 %doc README.md
 %{_libdir}/*.so.*
+%{_bindir}/*
 
 %files devel
 %doc README.md
