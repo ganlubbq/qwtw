@@ -268,7 +268,11 @@ void MWidgetEx::drawMarker(double t) {
 MarView::MarView(const std::string& key_, XQPlots* pf_, QWidget *parent) : JustAplot(key_, pf_, parent) {
 	if (!mpWasSet) {
 		mpWasSet = true;
+#ifdef WIN32
 		setMarbleDataPath("C:/programs/marble/data");
+#else
+		setMarbleDataPath("/usr/share/marble/data");
+#endif
 	}
 	mw = 0;
 	ctype = CoordType::ECEF;
