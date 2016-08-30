@@ -319,7 +319,9 @@ public:
         startQWT();
     }
     ~DLLStarter() {
+#ifdef WIN32
 		stopQWT();
+#endif
     }
 
 };

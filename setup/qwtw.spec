@@ -7,7 +7,7 @@ License:       LGPLv2
 URL:            https://github.com/ig-or/qwtw
 Source0:       https://github.com/ig-or/qwtw.tar.gz
 
-BuildRequires:  libtool, cmake >= 3.5.0, gcc-c++
+BuildRequires:  libtool, cmake >= 3.5.0, gcc-c++, python
 BuildRequires:	qt5-qt3d-devel, qt5-qtsvg-devel, qt5-qtbase-devel >= 5.6.1, qt5-qtwebkit-devel
 BuildRequires:	qt5-qtwebengine-devel, qt5-qtwebchannel-devel, qt5-qtwebsockets-devel
 BuildRequires:  qt5-qtxmlpatterns-devel
@@ -40,7 +40,8 @@ rm -R -f build
 mkdir build
 cd build
 rm -R -f *
-%cmake ../.
+PATH=%{_libdir}/qt5/bin:$PATH
+%cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release  ../.
 make  %{?_smp_mflags}
 
 %install

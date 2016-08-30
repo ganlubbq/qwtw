@@ -57,12 +57,12 @@ endif()
 libraryEnd(SHARED)
 
 if (UNIX)
-	install(FILES qwtw_c.h   DESTINATION include)
+	install(FILES qwtw_c.h   DESTINATION  include)
 endif()
 
 # ========================================================
 addSourceFilesSimple(testSrc "source" "."  qwtwtest)
 ADD_EXECUTABLE(qwtwtest ${testSrc})
 target_link_libraries(qwtwtest  qwtwc )
-
+install(TARGETS qwtwtest   DESTINATION bin)
 
