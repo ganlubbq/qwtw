@@ -2,7 +2,7 @@
 
 */
 
-#include "qwtw_c.h" // do not forget header file
+#include "qwtw_c.h" // do not forget the header file
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -34,6 +34,7 @@ double north[mwn] = {55.688713, 55.698713, 55.678713, 55.60};
 double east[mwn] = {37.901073, 37.911073, 37.905073, 37.9};
 double t4[mwn];
 
+//  this function will fill in data arrays
 void createInfo();
 
 int main(int argc, char* argv[]) {
@@ -60,7 +61,7 @@ int main(int argc, char* argv[]) {
 	qwtplot(x4, y5, n4, "x5 plot", "-k", 2, 1);
 	qwttitle("qwtw  testing");     qwtxlabel("[seconds ?]");     qwtylabel("sinuses %)");
     
-	// ------------------------
+	// ----- sinus and circle together on this plot ----------
 	qwtfigure(3);
 	qwtplot(x4, y6, n4, "x6 plot", "-b", 22, 1);
 	//  add a circle "-m" (magenta color) to the same plot
@@ -72,11 +73,9 @@ int main(int argc, char* argv[]) {
 	qwtplot2(circleData_x1, circleData_y1, nc, "circle", "-qm", 1, 12, circleTime_1);
 	qwttitle("'top view' test");
 
-
-
-#ifdef USEMARBLE
-	// --------   map view test ---------------------
 	
+#ifdef USEMARBLE
+	// --------   map view test: draw on a map  ---------------------
 	t4[0] = sinusTime_1[0]; t4[1] = sinusTime_1[int(n1 / 4.)];
 	 t4[2] = sinusTime_1[int(n1 / 3.)]; 
 	t4[3] = sinusTime_1[int(n1 / 2.)]; t4[4] = sinusTime_1[n1 - 1];
@@ -85,7 +84,8 @@ int main(int argc, char* argv[]) {
 	qwttitle("'marble' top view");
 #endif
 
-	//   show 'main control window'
+	//  --------- show 'main control window' ----------
+	//  this is very useful when you have  about 20 plots 
 	qwtshowmw();
 		
 
