@@ -9,7 +9,14 @@ This is a [library header file](https://github.com/ig-or/qwtw/blob/master/qwtw/c
 
 And this is a [small example how to use it](https://github.com/ig-or/qwtw/blob/master/qwtw/c_lib/qwtwtest.cpp)
 
+This is a small page with description of some useful features of this library: https://github.com/ig-or/QWTwPlot.jl/wiki/qwtw-library-features
+
+
 Also, there is a `Julia language` package as a wrapper for this library: https://github.com/ig-or/qwtwplot - so you can create all the plots from inside Julia Language.
+
+If you need something in this library which is not implemented yet, feel free to implement it! %) Or at least write me about it - may be I'll be able to add the features you need.
+
+
 
 how to install it:
 ==========================
