@@ -4,6 +4,7 @@
 #
 #    \version 1.0
 #
+#Copyright 2014 Topcon Positioning Systems CIS, LLC
 #
 
 import buildlib

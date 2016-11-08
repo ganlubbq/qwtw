@@ -4,6 +4,7 @@
 #
 #    \version 1.0
 #
+
 #
 
 
@@ -281,7 +282,9 @@ def config(projectPath, platform = 'jom', type = 'release'):
         'vs2010-x32': '"Visual Studio 10 2010"',
         'vs2010-x64': '"Visual Studio 10 2010 Win64"',
         'vs2013-x32': '"Visual Studio 12 2013"',
-        'vs2013-x64': '"Visual Studio 12 2013 Win64"'
+        'vs2013-x64': '"Visual Studio 12 2013 Win64"',
+        'vs2015-x32': '"Visual Studio 14 2015"',
+        'vs2015-x64': '"Visual Studio 14 2015 Win64"'
     }
     
     cmakeCmd = 'cmake -G ' + cmakeGkey[platform] 

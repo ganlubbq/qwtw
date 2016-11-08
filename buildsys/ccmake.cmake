@@ -25,7 +25,10 @@ macro (setPlatformName)
 		
 	elseif(WIN32)
 		message(STATUS "MSVC_VERSION = " ${MSVC_VERSION})
-		if (MSVC_VERSION STREQUAL 1600) # VS 2010 ?
+		message(STATUS "MSVC_CXX_ARCHITECTURE_ID = ${MSVC_CXX_ARCHITECTURE_ID}")
+		message(STATUS "CMAKE_CL_64 = ${CMAKE_CL_64}")
+	
+		if (MSVC_VERSION STREQUAL 1600) # VS 2010 
 			if (CMAKE_CL_64) # Using the 64 bit compiler from Microsoft
 				set(ourPlatform vs2010-x64)
 				set (ourLibSuffix lib-vs2010-x64)
@@ -33,13 +36,21 @@ macro (setPlatformName)
 				set(ourPlatform vs2010-x32)
 				set (ourLibSuffix lib-vs2010-x32)
 			endif()
-		elseif(MSVC_VERSION STREQUAL 1800) # VS2013 ?
+		elseif(MSVC_VERSION STREQUAL 1800) # VS2013 
 			if (CMAKE_CL_64) # Using the 64 bit compiler from Microsoft
 				set(ourPlatform vs2013-x64)
-				set (ourLibSuffix lib)
+				set (ourLibSuffix lib-vs2013-x64)
 			else()
 				set(ourPlatform vs2013-x32)
 				set (ourLibSuffix lib-vs2013-x32)
+			endif()
+		elseif(MSVC_VERSION STREQUAL 1900) # VS2015 
+			if (CMAKE_CL_64) # Using the 64 bit compiler from Microsoft
+				set(ourPlatform vs2015-x64)
+				set (ourLibSuffix lib-vs2015-x64)
+			else()
+				set(ourPlatform vs2015-x32)
+				set (ourLibSuffix lib-vs2015-x32)
 			endif()
 		else()
 			message(FATAL_ERROR " this Visual Studio version look like not supported yet")
@@ -90,6 +101,7 @@ macro (addQT)
 	set(AUTOGEN_TARGETS_FOLDER automoc)
 endmacro()
 
+
 macro (addQWTLinux) 
 	FIND_PATH(QWT_INCLUDE_DIR NAMES qwt.h PATHS  
 		/usr/include/qt5/qwt
@@ -113,10 +125,10 @@ macro (addQWTLinux)
 	else()
 		message(FATAL_ERROR "cannot find QWT library")
 	ENDIF()
-	
 
 	
 endmacro()
+
 
 macro (findOurLibs)
 	find_path(OUR_LIBRARY_DIR ${ourLibSuffix} PATHS ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH)
@@ -132,12 +144,12 @@ endmacro()
 
 # add build information to the source files list (curSrcList)
 macro (addVersionInfo curSrcList)
-	find_file(VERSION_INFO_FILE version.txt PATHS . ../ ../../ ../../../ ../../../../ NO_DEFAULT_PATH) # where is version.txt file?
-	find_path(BUILD_SYSTEM_PATH buildsys PATHS . ../ ../../ ../../../ ../../../../ NO_DEFAULT_PATH) 
+	find_file(VERSION_INFO_FILE version.txt PATHS . ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH) # where is version.txt file?
+	find_path(BUILD_SYSTEM_PATH buildsys PATHS . ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH) 
 	find_file(BUILDINFO_PY_SCRIPT build_info.py PATHS ${BUILD_SYSTEM_PATH}/buildsys  NO_DEFAULT_PATH)
 	if (NOT VERSION_INFO_FILE) # at first, try to create one:
 		file(WRITE "../version.txt" "1.0")
-		find_file(VERSION_INFO_FILE version.txt PATHS . ../ ../../ ../../../   NO_DEFAULT_PATH)
+		find_file(VERSION_INFO_FILE version.txt PATHS . ../ ../../ ../../../  NO_DEFAULT_PATH)
 		if (NOT VERSION_INFO_FILE) 
 			message(FATAL_ERROR "can not find version info file (version.txt); CMAKE_CURRENT_SOURCE_DIR=" ${CMAKE_CURRENT_SOURCE_DIR})
 		endif()
@@ -160,15 +172,14 @@ macro (addVersionInfo curSrcList)
 	
 	# recreate build info:
 	add_custom_command(OUTPUT ${BUILD_INFO_FILE} COMMAND python ${BUILDINFO_PY_SCRIPT} ${VERSION_INFO_FILE} ${BUILD_INFO_FILE} ${ourPlatform} DEPENDS ${VERSION_INFO_FILE} COMMENT "creating ${BUILD_INFO_FILE}")
-	
+
 	file(STRINGS  ${VERSION_INFO_FILE} VERSION_INFO_STRING)
 	message(STATUS "version:   ${VERSION_INFO_STRING}")
-   
 endmacro ()
 
 macro (addBuildNumber)
-	find_file(BN_INFO_FILE buildnumber.txt PATHS ./ ../ ../../ ../../../ ../../../../ NO_DEFAULT_PATH) # where is buildnumber.txt file?
-	find_path(BUILD_SYSTEM_PATH buildsys PATHS . ../ ../../ ../../../ ../../../../ NO_DEFAULT_PATH) 
+	find_file(BN_INFO_FILE buildnumber.txt PATHS ./ ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH) # where is buildnumber.txt file?
+	find_path(BUILD_SYSTEM_PATH buildsys PATHS . ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH) 
 	find_file(BN_PY_SCRIPT incbuildnumber.py PATHS ${BUILD_SYSTEM_PATH}/buildsys  NO_DEFAULT_PATH)
 	if (NOT BN_PY_SCRIPT) # cannot find one useful python script
 		message(STATUS "script: ${BN_PY_SCRIPT}")
@@ -178,7 +189,7 @@ macro (addBuildNumber)
 	if (NOT BN_INFO_FILE)
 		message(STATUS " WARNING: cannot find build info file... creating the new one")
 		file(WRITE "../buildnumber.txt" "1")
-		find_file(BN_INFO_FILE buildnumber.txt PATHS ./ ../ ../../   NO_DEFAULT_PATH)
+		find_file(BN_INFO_FILE buildnumber.txt PATHS ./ ../ ../../  NO_DEFAULT_PATH)
 		if (NOT BN_INFO_FILE)
 			message(FATAL_ERROR "ERROR in addBuildNumber: cannot create buildnumber.txt")
 		endif()
@@ -409,19 +420,20 @@ macro (commonEnd   libType)
 	endif()
 	
 	INCLUDE_DIRECTORIES(${INC_DIR_LIST}) 
-	
 	SET_TARGET_PROPERTIES( ${PROJECT_NAME}
 		PROPERTIES    DEBUG_OUTPUT_NAME ${PROJECT_NAME}d    RELEASE_OUTPUT_NAME ${PROJECT_NAME}
 		ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${OUR_LIBRARY_DIR}/debug"  ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUR_LIBRARY_DIR}/release"
 	)
 	
+
 	# add version info to the project properties:
 	if(${libType} STREQUAL SHARED) #  DLL special case:
 		SET_TARGET_PROPERTIES( ${PROJECT_NAME} 	PROPERTIES    SOVERSION ${VERSION_INFO_STRING})
 	else()
 		SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES     VERSION ${VERSION_INFO_STRING})
 	endif()
-	
+
+
 	if(WIN32 AND MSVC) 
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:fast /O2  /Ob2 /Oi /Ot /Qpar /openmp")
@@ -481,6 +493,7 @@ macro (commonEnd   libType)
 
 
 	endif()
+
 	
 	if (UNIX)
 		if(${libType} STREQUAL SHARED) #  DLL special case:
@@ -492,7 +505,7 @@ macro (commonEnd   libType)
 		endif()
 	endif()
 	
-	
+
 endmacro()
 
 macro (programEnd)

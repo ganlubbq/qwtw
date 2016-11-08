@@ -16,7 +16,7 @@ usage = "usage: %prog [options]"
 parser = OptionParser(usage=usage, prog="xmake")
 parser.add_option('--proj', dest='proj', action='store', default='', help="our project (relative ?) folder")
 parser.add_option('--op', dest='op', action='store', default='', help="operation: 'c' (configure) or 'b' (build) or 'd' (delete)")
-parser.add_option('--pf', dest='pf', action='store', default='', help="our platform ('vs2013-x64' ... 'jom' ... 'linux-x64' .. 'all' etc)")
+parser.add_option('--pf', dest='pf', action='store', default='', help="our platform ('vs2015-x64' ... 'jom' ... 'linux-x64' .. 'all' etc)")
 parser.add_option('--bt', dest='bt', action='store', default='', help="build type: 'release' or 'debug' (for jom or unix)")
 
 opt, args = parser.parse_args()

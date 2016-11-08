@@ -46,7 +46,7 @@ if (USE_MARBLE)
 endif()
 
 if(WIN32)
-	addExtLibrary(qwt VSTRING 6.1.2)
+	addExtLibrary(qwt VSTRING 6.1.4)
 	#list(APPEND LIB_LIST "ws2_32.lib")
 else()
 	add_definitions(-DLIN_UX)
