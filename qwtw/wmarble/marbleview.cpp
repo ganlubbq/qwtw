@@ -91,7 +91,7 @@ void MWidgetEx::addLine(LineItemInfo* line) {
 	f.maxLat = line->y[0];
 	f.maxLon = line->x[0];
 	f.minLat = line->y[0];
-	f.minLon = line->y[0];
+	f.minLon = line->x[0];
 	for (i = 0; i < line->size; i++) {
 		s->append(Marble::GeoDataCoordinates(line->x[i], line->y[i], 0., Marble::GeoDataCoordinates::Degree));
 		if (f.maxLat < line->y[i]) f.maxLat = line->y[i];
@@ -297,13 +297,16 @@ int MarView::mvInit() {
 	//mw->setMapThemeId("earth/plain/plain.dgml");
 	mw->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
 	//mw->setMapThemeId("earth/bluemarble/bluemarble.dgml");
+
+	/*
 	GeoDataPlacemark *place = new GeoDataPlacemark("office");
 	place->setCoordinate(37.6519, 55.72218, 0.0, GeoDataCoordinates::Degree);
 	place->setPopulation(250);
 	place->setCountryCode("Russia");
 	place->setDescription("Moscow");
+	*/
 	GeoDataDocument *document = new GeoDataDocument;
-	document->append(place);
+	//document->append(place);
 
 	// Add the document to MarbleWidget's tree model
 	mw->model()->treeModel()->addDocument(document);
@@ -315,13 +318,13 @@ int MarView::mvInit() {
 	mw->setShowBorders(true);
 	mw->setShowGrid(true);
 	mw->showGrid();
-	mw->setAnimationsEnabled(true);
-	mw->setViewContext(Marble::Animation);
+	//mw->setAnimationsEnabled(true);
+	//mw->setViewContext(Marble::Animation);
 	mw->setShowCities(true);
-	mw->setShowTerrain(true);
+	//mw->setShowTerrain(true);
 
 	// Hide the FloatItems: Compass and StatusBar
-	//mw->setShowOverviewMap(false);
+	mw->setShowOverviewMap(false);
 	//mw->setShowScaleBar(false);
 
 	//mw->setShowCompass(false);
