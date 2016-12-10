@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "qwtw library"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.3"
 #define MyAppPublisher "Igor Sandler"
 #define MyAppURL "https://github.com/ig-or/qwtw"
 
@@ -21,79 +21,52 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\qwtw
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-OutputBaseFilename=qwtwsetup-win-x64-1.0.1
+OutputBaseFilename=qwtwsetup-win-x64-1.0.2
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
+
+#define tch "vs2015-x64"
+#define boostver "1.62.0"
+#define qtver "5.7.0"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 
-Source: "I:\space\qwtw2\lib\release\qwtwc.lib"; DestDir: "{app}"; Flags: ignoreversion
-Source: "I:\space\qwtw2\lib\release\qwtwtest.exe"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-Source: "I:\space\qwtw2\qwtw\c_lib\qwtw_c.h"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}..\lib-{#tch}\release\qwtwc.lib"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}..\qwtw\c_lib\qwtw_c.h"; DestDir: "{app}"; Flags: ignoreversion
 
+Source: "{#SourcePath}..\lib-{#tch}\release\qwtwc.dll"; DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
+Source: "{#SourcePath}..\lib-{#tch}\release\qwtwtest.exe"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
 
-Source: "I:\space\rdframer\rdm_reframer\inst\msvcp120.DLL"; DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
-Source: "I:\space\rdframer\rdm_reframer\inst\msvcr120.DLL"; DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
+Source: "{#SourcePath}vs-redist\{#tch}\*";   DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
 
-Source: "I:\space\qwtw2\lib\release\qwtwc.dll"; DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
+Source: "{#SourcePath}..\..\extlib\marble\1.11.3\{#tch}\bin\astro.dll"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags: 
+Source: "{#SourcePath}..\..\extlib\marble\1.11.3\{#tch}\bin\marblewidget-qt5.dll"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags: ignoreversion
+Source: "{#SourcePath}..\..\extlib\marble\1.11.3\data\*"; DestDir: "{commonappdata}/qwtw/marble-data";  Flags: ignoreversion    recursesubdirs
 
-Source: "I:\space\rdframer\lib\release\astro.dll"; DestDir: "{commonappdata}/qwtw"; 
-Source: "I:\space\rdframer\lib\release\marblewidget-qt5.dll"; DestDir: "{commonappdata}/qwtw"; 
-Source: "C:\programs\marble\data\*"; DestDir: "C:\programs\marble\data";   Flags: ignoreversion    recursesubdirs
-Source: "I:\space\extlib\openssl\1.0.2f\vs2013-x64\bin\*"; DestDir: "{commonappdata}/qwtw";      Flags: ignoreversion    recursesubdirs
+;Source: "{#SourcePath}..\..\extlib\openssl\1.1.0c\{#tch}\bin\*"; DestDir: "{commonappdata}/qwtw";      Flags: ignoreversion    recursesubdirs 
+Source: "{#SourcePath}..\..\extlib\openssl\1.0.2f\vs2013-x64\bin\*"; DestDir: "{commonappdata}/qwtw";      Flags: ignoreversion    recursesubdirs 
 
+Source: "{#SourcePath}..\..\extlib\boost\{#boostver}\{#tch}\*"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags:  recursesubdirs
+Source: "{#SourcePath}..\..\extlib\qt\{#qtver}\{#tch}\*"; DestDir: "{commonappdata}/qwtw";  Check: Is64BitInstallMode; Flags: recursesubdirs
 
-Source: "I:\space\rdframer\lib\release\boost_chrono-vc120-mt-1_60.dll"; DestDir: "{commonappdata}/qwtw"; 
-Source: "I:\space\rdframer\lib\release\boost_system-vc120-mt-1_60.dll"; DestDir: "{commonappdata}/qwtw"; 
-Source: "I:\space\rdframer\lib\release\boost_thread-vc120-mt-1_60.dll"; DestDir: "{commonappdata}/qwtw"; 
+Source: "{#SourcePath}..\..\extlib\qwt\6.1.4\{#tch}\bin\qwt.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
 
-;Source: "I:\space\rdframer\lib\release\icudt54.dll"; DestDir: "{commonappdata}/qwtw"; 
-;Source: "I:\space\rdframer\lib\release\icuin54.dll"; DestDir: "{commonappdata}/qwtw"; 
-;Source: "I:\space\rdframer\lib\release\icuuc54.dll"; DestDir: "{commonappdata}/qwtw"; 
-
-;Source: "I:\space\rdframer\lib\release\libEGL.dll"; DestDir: "{commonappdata}/qwtw"; 
-;Source: "I:\space\rdframer\lib\release\libGLESv2.dll"; DestDir: "{commonappdata}/qwtw"; 
-;Source: "I:\space\rdframer\lib\release\opengl32sw.dll"; DestDir: "{commonappdata}/qwtw"; 
-
-
-Source: "I:\space\rdframer\lib\release\platforms\qwindows.dll"; DestDir: "{commonappdata}/qwtw/platforms"; 
-
-;Source: "I:\space\rdframer\lib\release\qminimal.dll"; DestDir: "{commonappdata}/qwtw";   
-;Source: "I:\space\rdframer\lib\release\qoffscreen.dll"; DestDir: "{commonappdata}/qwtw"; 
-
-
-
-Source: "I:\space\rdframer\lib\release\Qt5Core.dll"; DestDir: "{commonappdata}/qwtw"; 
-Source: "I:\space\rdframer\lib\release\Qt5DBus.dll"; DestDir: "{commonappdata}/qwtw"; 
-Source: "I:\space\rdframer\lib\release\Qt5Gui.dll"; DestDir: "{commonappdata}/qwtw"; 
-
-
-Source: "I:\space\rdframer\lib\release\Qt5Network.dll"; DestDir: "{commonappdata}/qwtw"; 
-
-Source: "I:\space\rdframer\lib\release\Qt5OpenGL.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-;Source: "I:\space\rdframer\lib\release\Qt5Positioning.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-Source: "I:\space\rdframer\lib\release\Qt5PrintSupport.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-Source: "I:\space\rdframer\lib\release\Qt5Qml.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-Source: "I:\space\rdframer\lib\release\Qt5Quick.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-
-
-Source: "I:\space\rdframer\lib\release\Qt5Script.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-
-Source: "I:\space\rdframer\lib\release\Qt5Svg.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-         
-Source: "I:\space\rdframer\lib\release\Qt5Widgets.dll"; DestDir: "{commonappdata}/qwtw";          
-      
-Source: "I:\space\rdframer\lib\release\Qt5Xml.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-
-;Source: "I:\space\rdframer\lib\release\qwindows.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-Source: "I:\space\rdframer\lib\release\qwt.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-;Source: "I:\space\rdframer\lib\release\zlib.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+
+[InstallDelete]
+;Type: filesandordirs; Name: "{commonappdata}/rdframer"
+Type: filesandordirs; Name: "{%TEMP}/qwtw"
+Type: filesandordirs; Name: "{commonappdata}/qwtw"
+
+[UninstallDelete]
+;Type: filesandordirs; Name: "{commonappdata}/rdframer"
+Type: filesandordirs; Name: "{%TEMP}/qwtw"
+Type: filesandordirs; Name: "{commonappdata}/qwtw"
+
 

@@ -37,9 +37,9 @@ using namespace Marble;
 
 static bool mpWasSet = false;
 
-int setMarbleDataPath(char* p) {
+int setMarbleDataPath(const char* p) {
 #ifdef WIN32
-	MarbleDirs::setMarbleDataPath(p/*"C:/programs/marble/data"*/);
+	MarbleDirs::setMarbleDataPath(p);
 #else
 	MarbleDirs::setMarbleDataPath(p/*"/usr/share/marble/data"*/);
 #endif
@@ -269,7 +269,9 @@ MarView::MarView(const std::string& key_, XQPlots* pf_, QWidget *parent) : JustA
 	if (!mpWasSet) {
 		mpWasSet = true;
 #ifdef WIN32
-		setMarbleDataPath("C:/programs/marble/data");
+		std::string cp = getCommonAppDataPath();
+		cp.append("\\qwtw\\marble-data");
+		setMarbleDataPath(cp.c_str());
 #else
 		setMarbleDataPath("/usr/share/marble/data");
 #endif

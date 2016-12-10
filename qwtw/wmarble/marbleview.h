@@ -15,7 +15,7 @@ class ENUframe;
 /**
 @return 0 if all is OK
 */
-int setMarbleDataPath(char* p);
+int setMarbleDataPath(const char* p);
 
 class MarView: public JustAplot {
 	Q_OBJECT
