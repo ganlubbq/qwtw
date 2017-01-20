@@ -84,6 +84,7 @@ macro (addBoost)
 	#message(STATUS boost libs:  ${Boost_LIBRARIES})
 endmacro()
 
+# add QT5 macro
 macro (addQT)
 	# Find includes in corresponding build directories
 	set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -99,6 +100,38 @@ macro (addQT)
 	find_package(Qt5Widgets)
 	list(APPEND LIB_LIST "Qt5::Core" "Qt5::Widgets" "Qt5::Gui")
 	set(AUTOGEN_TARGETS_FOLDER automoc)
+	
+	set(now_using_QT YES)
+	set(now_using_QT5 YES)
+endmacro()
+
+# add QT4 macro
+macro (addQT4)
+	# Find includes in corresponding build directories
+	
+	# Instruct CMake to run moc automatically when needed.
+	set(AUTOGEN_TARGETS_FOLDER automoc)
+	
+	set(CMAKE_AUTOMOC ON)
+	set(CMAKE_INCLUDE_CURRENT_DIR ON)
+	
+	set(CMAKE_AUTOUIC ON)
+	set(CMAKE_AUTORCC ON)
+	
+	set (QTDIR $ENV{QTDIR})  #  ? do we need this really?
+	list(APPEND CMAKE_PREFIX_PATH ${QTDIR})
+	
+	# Find the Qt library
+	find_package(Qt4 REQUIRED)
+	include(${QT_USE_FILE})
+	add_definitions(${QT_DEFINITIONS})
+	list(APPEND LIB_LIST  ${QT_LIBRARIES}   ${QT_QTMAIN_LIBRARY})
+	#list(APPEND LIB_LIST "Qt4::Core" "Qt4::Widgets" "Qt4::Gui")
+	
+	
+	
+	set(now_using_QT YES)
+	set(now_using_QT4 YES)
 endmacro()
 
 
@@ -231,33 +264,74 @@ macro (addExtLibrary libNickname)
 	endif()
 	set(extLibPlatformPath ${extLibPath}/${ourPlatform})
 	
-	if (earg_RLNAME)
+	#if RLNAME was provided, 'lName' and 'dName' vars should be OK
+	if (earg_RLNAME) # choose particular library with this name:
 		set(lName "${extLibPlatformPath}/lib/${earg_RLNAME}") 
-	else()
-		set(lName "${extLibPlatformPath}/lib/${libNickname}") 
-	endif()
-	
-	if (earg_DLNAME) # we have a very special name for debug version
-		set(dName "${extLibPlatformPath}/lib/${earg_DLNAME}${CMAKE_LINK_LIBRARY_SUFFIX}") 
-		# this dName MUST exist, since we specify it here:
-		if (NOT EXISTS "${dName}") 
-			message(FATAL_ERROR "addExtLibrary: cannot locate ${dName} file") 
+		if (earg_DLNAME) # we have a very special name for debug version
+			set(dName "${extLibPlatformPath}/lib/${earg_DLNAME}${CMAKE_LINK_LIBRARY_SUFFIX}") 
+			# this dName MUST exist, since we specify it here:
+			if (NOT EXISTS "${dName}") 
+				message(FATAL_ERROR "addExtLibrary: cannot locate ${dName} file") 
+			endif()
+		else() # use name for 'release'.d; 
+			set(dName "${lName}d${CMAKE_LINK_LIBRARY_SUFFIX}") 
 		endif()
-	else() # use name for 'release'.d; 
-		set(dName "${lName}d${CMAKE_LINK_LIBRARY_SUFFIX}") 
-	endif()
-	set(lName "${lName}${CMAKE_LINK_LIBRARY_SUFFIX}")
+		set(lName "${lName}${CMAKE_LINK_LIBRARY_SUFFIX}") # finalize release library name
+		if (NOT EXISTS ${lName}) 
+			message(FATAL_ERROR "addExtLibrary: cannot locate ${lName} file") 
+		endif()
+					
+		if (EXISTS ${dName}) # we have got separate debug and release
+			list(APPEND releaseLibList optimized ${lName})
+			list(APPEND debugLibList debug ${dName})
+			message(STATUS "${libNickname} added (release and debug)")
+		else()	# everything is in one place
+			list(APPEND LIB_LIST ${lName})
+			message(STATUS "${libNickname} added (release only)")
+		endif()
 	
-	if (EXISTS ${dName}) # we have got separate debug and release
-		list(APPEND releaseLibList optimized ${lName})
-		list(APPEND debugLibList debug ${dName})
-		message(STATUS "${libNickname} added (release and debug)")
-	else()	# everything is in one place
-		list(APPEND LIB_LIST ${lName})
-		message(STATUS "${libNickname} added (release only)")
+	else() # lets grab everything in this case:
+		#	set(lName "${extLibPlatformPath}/lib/${libNickname}") 
+		#
+		#	lets grab all the files:
+		#
+		if (EXISTS "${extLibPlatformPath}/lib/release")
+			set (thisLibFilesRelease)
+			file(GLOB thisLibFilesRelease "${extLibPlatformPath}/lib/release/*")
+			foreach (item ${thisLibFilesRelease})
+				list(APPEND releaseLibList optimized ${item})
+			endforeach()
+		endif()
+		if (EXISTS "${extLibPlatformPath}/lib/debug")
+			set (thisLibFilesDebug)
+			file(GLOB thisLibFilesDebug "${extLibPlatformPath}/lib/debug/*")
+			foreach (item ${thisLibFilesDebug})
+				list(APPEND debugLibList debug ${item})
+			endforeach()
+		endif()
+		
+		set(thisLibFiles)
+		file(GLOB thisLibFiles "${extLibPlatformPath}/lib/*.lib")
+		if (thisLibFiles)
+			list(APPEND LIB_LIST ${thisLibFiles})
+		endif()
+		
+		
+		#message(STATUS "following libs were added: ")
+		#message(STATUS ${thisLibFiles})
 	endif()
-	
+
 	list(APPEND INC_DIR_LIST "${extLibPath}/include")
+	
+	#lets collect all the subfolders from 'include' here:
+	FILE(GLOB incSubDirs LIST_DIRECTORIES true  "${extLibPath}/include/*")
+	SET(incSubDirList "")
+	FOREACH(incSubDir ${incSubDirs})
+		IF(IS_DIRECTORY ${incSubDir})
+			LIST(APPEND incSubDirList ${incSubDir})
+		ENDIF()
+	ENDFOREACH()
+	list(APPEND INC_DIR_LIST ${incSubDirList})
 
 endmacro()
 
@@ -392,15 +466,16 @@ macro (commonEnd   libType)
 	
 	add_definitions(-DNOMINMAX)
 	add_definitions(-DOURPROJECTNAME=${PROJECT_NAME}) # this can be used in 'version()' function
-	list(APPEND CMAKE_C_FLAGS_DEBUG	-D_DEBUG -DBUILD123=1)
+	list(APPEND CMAKE_C_FLAGS_DEBUG	-D_DEBUG -DBUILD123=1  -D_ITERATOR_DEBUG_LEVEL=0)
 	list(APPEND CMAKE_C_FLAGS_RELEASE	-D_SCL_SECURE_NO_WARNINGS -DNDEBUG -DBUILD123=2  -D_ITERATOR_DEBUG_LEVEL=0 )
 	
 	addVersionInfo(SRC_LIST)
 			
 	if(${libType} STREQUAL EXE)
 	
-		if (WIN32 AND USE_QT)
-			if (${USE_QT} STREQUAL YES )
+		if (WIN32 AND now_using_QT)
+			if (${now_using_QT} STREQUAL YES )
+				
 				ADD_EXECUTABLE(${PROJECT_NAME}  WIN32 ${SRC_LIST})
 			else()
 				message(FATAL_ERROR "error: WIN32 = ${WIN32} and USE_QT=${USE_QT}")
@@ -425,6 +500,19 @@ macro (commonEnd   libType)
 		ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${OUR_LIBRARY_DIR}/debug"  ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUR_LIBRARY_DIR}/release"
 	)
 	
+	if (${now_using_QT5})
+		set_property(TARGET ${PROJECT_NAME} PROPERTY QT5_NO_LINK_QTMAIN ON)
+	endif()
+	
+	if (${now_using_QT4})
+		IF(WIN32)
+			if(MSVC) 
+				set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
+			endif()
+		endif()	
+		QT4_AUTOMOC(${SRC_LIST})
+		set_property(TARGET ${PROJECT_NAME} PROPERTY QT4_NO_LINK_QTMAIN ON)
+	endif()
 
 	# add version info to the project properties:
 	if(${libType} STREQUAL SHARED) #  DLL special case:

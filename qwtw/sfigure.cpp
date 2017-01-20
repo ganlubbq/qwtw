@@ -84,6 +84,10 @@ JustAplot* XQPlots::figure(std::string name_, int type) {
 		cf->showNormal();
 
 	}   else  {
+
+
+
+
 		switch(type) {
 		case 1:
 			cf	= new Figure2(name_, this, parent);
@@ -165,8 +169,21 @@ void XQPlots::clipAll(double t1, double t2) {
 }
 
 JustAplot* XQPlots::figure(int n, int type) {
-	std::ostringstream ost; ost << n;
-	std::string fName = ost.str();
+	char buf[32];
+	std::string fName;
+	if (n == 0) { //  this means 'create new'
+		for (int i = 500; i < 1500; i++) {
+			snprintf(buf, 32, "%d", i);
+			fName.assign(buf);
+			if (figures.find(fName) == figures.end()) { //   new value
+				n = i;
+				break;
+			}
+		}
+	}
+	
+	snprintf(buf, 32, "%d", n);
+	fName.assign(buf);
 	return figure(fName, type);
 }
 

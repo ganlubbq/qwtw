@@ -4,7 +4,6 @@
 #
 #    \version 1.0
 #
-
 #
 
 
@@ -323,6 +322,7 @@ def config(projectPath, platform = 'jom', type = 'release'):
         cmdLogOutput(cmakeOutput)
         raise Exception('cmake faild: (' + cmakeCmd + ')')
     if rv != 0:
+        cmdLogOutput(cmakeOutput)
         raise Exception('cmake (' + cmakeCmd + ') faild: return code = ' + str(rv))
 
     
