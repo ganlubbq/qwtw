@@ -103,7 +103,8 @@ signals:
 
 protected:
 	Ui_topviewplotdlg    ui;
-	std::map<std::string,  JustAplot*> figures;
+	typedef std::map<std::string, JustAplot*> FSet;
+	FSet figures;
 
 	JustAplot*	cf;	
 	QWidget* parent;
@@ -130,6 +131,7 @@ private slots:
 	void onPicker(const std::string& key_, double X, double Y);
 	void onTvItemClicked(QModelIndex mi);
 	void onCloseAllPlots(bool checked);
+	void onShowAllPlots(bool checked);
 };
 
 

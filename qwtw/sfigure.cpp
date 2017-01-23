@@ -18,6 +18,8 @@
 #include <sstream>
 #include "justaplot.h"
 #include "xstdef.h"
+#include <QApplication>
+#include "qdesktopwidget.h"
 //#include "topviewplot.h"
 
 #ifdef USEMARBLE
@@ -46,6 +48,8 @@ XQPlots::XQPlots(QWidget * parent1): QDialog(parent1) {
 	connect(ui.tv, SIGNAL(clicked(QModelIndex)), this, SLOT(onTvItemClicked(QModelIndex)));
 
 	connect(ui.tbClosePlots, SIGNAL(clicked(bool)), this, SLOT(onCloseAllPlots(bool)));
+	connect(ui.tbShowEverything, SIGNAL(clicked(bool)), this, SLOT(onShowAllPlots(bool)));
+
 }
 
 XQPlots::~XQPlots() {
@@ -145,6 +149,55 @@ JustAplot* XQPlots::getPlotByName(std::string s) {
 
 void XQPlots::onCloseAllPlots(bool checked) {
 	clear();
+}
+
+void XQPlots::onShowAllPlots(bool checked) {
+	int n = figures.size();
+	if (n < 1) return;
+	double side = sqrt(n);
+	int w = ceil(side);
+	int h = floor(side);
+	if (w*h < n) {
+		h++;
+	}
+	mxat(w*h >= n);
+	QRect rec = QApplication::desktop()->screenGeometry();
+	int height = rec.height();
+	int width = rec.width() - 48;
+	int hh = floor(height / h);
+	int ww = floor(width / w);
+	int i = 0, j = 0;
+	QRect g, g1, g2;
+	int dx, dy;
+
+	for (FSet::iterator it = figures.begin(); it != figures.end(); it++) {
+		g1 = it->second->frameGeometry();
+		g2 = it->second->geometry();
+		dx = g1.width() - g2.width();
+		dy = g1.height() - g2.height();
+
+		
+		it->second->resize(ww - dx, hh - dy);
+		it->second->move(i*ww, j*hh);
+
+		/*g.setTop(j*hh); 
+		g.setBottom((j + 1)*hh);
+		g.setLeft(i*ww);
+		g.setRight((i + 1)*ww);
+		*/
+		
+		//it->second->setGeometry(g);
+		
+		it->second->show();
+		it->second->raise();
+
+		i++;
+		if (i >= w) {
+			i = 0;
+			j++;
+		}
+	}
+
 }
 
 void XQPlots::drawMarker(const std::string& key_, double X, double Y, int type) {
