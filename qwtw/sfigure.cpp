@@ -29,6 +29,7 @@
 XQPlots::XQPlots(QWidget * parent1): QDialog(parent1) {
 	parent = parent1;
 	cf = 0;  //cf3 = 0;
+	markersAreVisible = false;
 	//currentFigureMode = 2;  //  
 	clearingAllFigures = false;
 	currentImportanceMode = true;
@@ -130,7 +131,7 @@ void XQPlots::onTvItemClicked(QModelIndex mi) {
 		p->activateWindow();
 		p->raise();
 		//p->showMaximized();
-		//p->showNormal();
+		p->showNormal();
 	}
 
 }
@@ -177,6 +178,7 @@ void XQPlots::onShowAllPlots(bool checked) {
 		dy = g1.height() - g2.height();
 
 		
+		it->second->showNormal();
 		it->second->resize(ww - dx, hh - dy);
 		it->second->move(i*ww, j*hh);
 
@@ -190,7 +192,7 @@ void XQPlots::onShowAllPlots(bool checked) {
 		
 		it->second->show();
 		it->second->raise();
-
+		
 		i++;
 		if (i >= w) {
 			i = 0;
@@ -201,17 +203,29 @@ void XQPlots::onShowAllPlots(bool checked) {
 }
 
 void XQPlots::drawMarker(const std::string& key_, double X, double Y, int type) {
+	//if (!markersAreVisible) markersAreVisible = true;
 	std::map<std::string,  JustAplot*>::iterator it = figures.find(key_);
 	if (it != figures.end()) {
 		it->second->drawMarker(X, Y, type);
 	}
 }
 
+void XQPlots::setAllMarkersVisible(bool visible) {
+	std::map<std::string, JustAplot*>::iterator it;
+	for (it = figures.begin(); it != figures.end(); it++) {
+		it->second->makeMarkersVisible(visible);
+	}
+}
+
 void XQPlots::drawAllMarkers(double t) {
+	//if (!markersAreVisible) markersAreVisible = true;
     std::map<std::string, JustAplot*>::iterator it;
     for(it = figures.begin(); it != figures.end(); it++) {
 	   it->second->drawMarker(t);
     }
+	for (it = figures.begin(); it != figures.end(); it++) {
+		it->second->replot();
+	}
 }
 
 void XQPlots::clipAll(double t1, double t2) {

@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
 
 	int itmp;
 	std::cin >> itmp;
+	system("pause");
 
 	delete[] x_sinusData_2;
 	delete[] y_sinusData_2;

@@ -303,26 +303,27 @@ def config(projectPath, platform = 'jom', type = 'release'):
         print('running ' + cmakeCmd)
         p = subprocess.Popen(cmakeCmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in p.stdout.readlines():
-            cmakeOutput.append(line)
+            #cmakeOutput.append(line)
+			print line
             #if line.lower().find('error') >= 0:
              #   print line
             #else:
                 #print line
-            if line.lower().find('errors occurred') >= 0:
-                ok = 1  # not OK
-            if ok != 0:
-                print line
+            #if line.lower().find('errors occurred') >= 0:
+            #    ok = 1  # not OK
+            #if ok != 0:
+            #    print line
 
         rv = p.wait()
     except  Exception as einst: # 
-        cmdLogOutput(cmakeOutput)
+        #cmdLogOutput(cmakeOutput)
         raise Exception('cmake faild #1 (' + cmakeCmd + ')')
         
     if ok == 1:
-        cmdLogOutput(cmakeOutput)
+        #cmdLogOutput(cmakeOutput)
         raise Exception('cmake faild: (' + cmakeCmd + ')')
     if rv != 0:
-        cmdLogOutput(cmakeOutput)
+        #cmdLogOutput(cmakeOutput)
         raise Exception('cmake (' + cmakeCmd + ') faild: return code = ' + str(rv))
 
     

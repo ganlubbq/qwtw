@@ -48,7 +48,7 @@ class qqwtw_API XQPlots: public QDialog {
 	Q_OBJECT
 
 public:
-
+	bool markersAreVisible;
 	XQPlots(QWidget * parent1 = 0);
 	~XQPlots();
 
@@ -66,6 +66,7 @@ public:
 
 	*/
 	void setmode(int mode_);
+	void setAllMarkersVisible(bool visible);
 
 	void setImportant(bool i);
 

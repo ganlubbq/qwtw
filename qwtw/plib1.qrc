@@ -1,5 +1,5 @@
-<RCC>
-  <qresource prefix="icons" >
+<!DOCTYPE RCC><RCC version="1.0">
+  <qresource prefix="/icons" >
     <file>../img/arrow.png</file>
     <file>../img/binokl.png</file>
     <file>../img/box.png</file>

@@ -18,7 +18,7 @@ set(INC_DIR_LIST "../"   "../../common" "../../xmatrix2" )
 list(APPEND HEADERS_LIST  "../figure2.h")
 	
 addSourceFiles("source" "." 	qtint qwtw_c )	
-addSourceFiles("qwtw" "../" sfigure figure2 justaplot )	
+addSourceFiles("qwtw" "../" sfigure figure2 justaplot plib1.qrc)	
 addSourceFiles("matrix" "../../xmatrix2" xmatrix2 	xmatrixplatform xmatrix_imp xmcoords )
 
 addSourceFiles("common" "../../common"
@@ -28,7 +28,7 @@ addSourceFiles("common" "../../common"
 
 addSourceFiles("klifft" "../../common/klifft"	complex fft psd )
 
-list(APPEND SRC_LIST  ../plib1.qrc)
+#list(APPEND SRC_LIST  ../plib1.qrc)
 
 add_definitions(-DUNICODE -D_UNICODE)
 add_definitions(-DQT_DLL -DQWT_DLL -DqqwtwEXPORTS -DqwtwcEXPORTS)
@@ -36,8 +36,12 @@ add_definitions(-DQT_DLL -DQWT_DLL -DqqwtwEXPORTS -DqwtwcEXPORTS)
 if (USE_MARBLE)
 	add_definitions(-DUSEMARBLE)
 	addSourceFiles("marble" "../wmarble" marbleview)
+	
+	add_definitions(-DQT_USE_QSTRINGBUILDER -DQT_NO_URL_CAST_FROM_STRING -DQT_NO_CAST_TO_ASCII -DQT_NO_CAST_FROM_BYTEARRAY -DQT_STRICT_ITERATORS)
+	#add_definitions(-DQT_USE_QSTRINGBUILDER -DQT_NO_URL_CAST_FROM_STRING -DQT_NO_CAST_TO_ASCII -DQT_NO_CAST_FROM_BYTEARRAY -DQT_STRICT_ITERATORS)
+	
 	if (WIN32)
-		addExtLibrary(marble VSTRING 1.11.3 RLNAME marblewidget-qt5 DLNAME marblewidget-qt5d  )
+		addExtLibrary(marble VSTRING 16.12 RLNAME marblewidget-qt5 DLNAME marblewidget-qt5d  )
 	else()
 		FIND_PACKAGE (Marble REQUIRED)	
 		list(APPEND INC_DIR_LIST ${MARBLE_INCLUDE_DIR}) 	
@@ -46,7 +50,7 @@ if (USE_MARBLE)
 endif()
 
 if(WIN32)
-	addExtLibrary(qwt VSTRING 6.1.4)
+	addExtLibrary(qwt VSTRING trunk RLNAME qwt)
 	#list(APPEND LIB_LIST "ws2_32.lib")
 else()
 	add_definitions(-DLIN_UX)
@@ -60,9 +64,11 @@ if (UNIX)
 	install(FILES qwtw_c.h   DESTINATION  include)
 endif()
 
+add_subdirectory(test)
+
 # ========================================================
-addSourceFilesSimple(testSrc "source" "."  qwtwtest)
-ADD_EXECUTABLE(qwtwtest ${testSrc})
-target_link_libraries(qwtwtest  qwtwc )
-install(TARGETS qwtwtest   DESTINATION bin)
+#addSourceFilesSimple(testSrc "source" "."  qwtwtest)
+#ADD_EXECUTABLE(qwtwtest ${testSrc})
+#target_link_libraries(qwtwtest  qwtwc )
+#install(TARGETS qwtwtest   DESTINATION bin)
 

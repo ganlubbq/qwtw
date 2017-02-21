@@ -63,6 +63,7 @@ QPointF FSPicker::transform1(	const QPoint & 	pos	 ) 	 const {
 
 
 FSPlot::FSPlot(QWidget *parent) : QwtPlot(parent), squareAxis(false) {
+	//const bool doReplot = autoReplot();
 	setAutoReplot(false);
 	//setTitle("no titile yet");
 	setCanvasBackground(QColor(Qt::white));
@@ -93,7 +94,8 @@ FSPlot::FSPlot(QWidget *parent) : QwtPlot(parent), squareAxis(false) {
    // m_rescaler->setAspectRatio( QwtPlot::yLeft, 1.0 );
 	//m_rescaler->setEnabled(false);
 
-	setAutoReplot(true); // ?
+	//setAutoReplot(doReplot); // ?
+	setAutoReplot(false);
 }
 
 void FSPlot::resizeEvent(QResizeEvent* e) {
@@ -268,10 +270,13 @@ Figure2::~Figure2() {
 
 void Figure2::ontb1(bool checked ) {  //   picker
 	picker->setEnabled(checked);
-	if (checked) 
-		mode = 1; 
-	else 
+	pf->setAllMarkersVisible(checked);
+
+	if (checked) {
+		mode = 1;
+	} else {
 		mode = 0;
+	}
 
 	setTBState(); 
 }
@@ -347,6 +352,7 @@ void Figure2::ylabel(const std::string& s) {
 }
  
 void Figure2::addLine(LineItemInfo* line) {
+	const bool doReplot = plot1->autoReplot();
 	plot1->setAutoReplot(false);
 	JustAplot::addLine(line);
 	QwtPlotCurve* cl = new QwtPlotCurve(line->legend.c_str());
@@ -433,8 +439,11 @@ void Figure2::addLine(LineItemInfo* line) {
 	if (sym->style() == QwtSymbol::NoSymbol) {
 		//cl->setSymbol(0);
 		delete sym; //   we do not need it anymore
+		cl->setLegendAttribute(QwtPlotCurve::LegendShowLine);
+		
 	} else {
 		cl->setSymbol(sym); //    "cl" will delete it itself later
+		cl->setLegendAttribute(QwtPlotCurve::LegendShowSymbol);
 		//QwtSymbol* sym1 = new QwtSymbol(sym);
 		//cl->setSymbol(sym1);
 	}
@@ -464,15 +473,15 @@ void Figure2::addLine(LineItemInfo* line) {
 
 	*/
 	cl->setPen(pen);
-    cl->setLegendAttribute( QwtPlotCurve::LegendShowLine );
 
-    cl->setSamples(line->x, line->y, line->size);
-    //cl->setRawSamples(line->x, line->y, line->size);
+    //cl->setSamples(line->x, line->y, line->size);
+    cl->setRawSamples(line->x, line->y, line->size);
 
 	cl->setYAxis( QwtPlot::yLeft );  cl->setXAxis( QwtPlot::xBottom );
 
 	cl->setPaintAttribute(QwtPlotCurve::ClipPolygons, true );
 	cl->setPaintAttribute(QwtPlotCurve::FilterPoints, true );
+	cl->setPaintAttribute(QwtPlotCurve::MinimizeMemory, false);
 
 	cl->attach(plot1);
 
@@ -491,7 +500,7 @@ void Figure2::addLine(LineItemInfo* line) {
 
 	plot1->updateAxes();
 	zoomer->setZoomBase(true);
-	plot1->setAutoReplot(true);
+	plot1->setAutoReplot(doReplot);
 	//plot1->replot();
 	zoomer->setZoomBase();
 }
@@ -602,7 +611,11 @@ void Figure2::retranslateUi()     {
 
 void Figure2::ui_addTBIcon(QToolButton* tb, const char* i) {
     QIcon icon;
-    icon.addPixmap(QPixmap(QString::fromUtf8(i)), QIcon::Normal, QIcon::Off);
+	QString s = QString::fromUtf8(i);
+	QPixmap pm = QPixmap(s);
+    icon.addPixmap(pm, QIcon::Normal, QIcon::Off);
+
+//	icon.addFile(":/icons/binokl");
     tb->setIcon(icon);
 }
 
@@ -809,11 +822,38 @@ void Figure2::drawMarker(double X, double Y, int type) {
     for (std::list<FigureItem*>::iterator it = lines.begin(); it != lines.end(); it++) {
 	    FigureItem* fi = *it;
 	    if (fi->info->mode == 0)  continue;
-	    fi->ma->setVisible(true);
+	   // fi->ma->setVisible(true);
 	    fi->ma->setValue(xx, yy);
     }
 
-    plot1->replot(); // ?
+ //   plot1->replot(); // ?
+}
+
+void Figure2::makeMarkersVisible(bool visible) {
+	JustAplot::makeMarkersVisible(visible);
+	if (lines.empty()) {
+		return;
+	}
+
+	int mode = -1;
+
+	for (std::list<FigureItem*>::iterator it = lines.begin(); it != lines.end(); it++) {
+		FigureItem* fi = *it;
+		if (fi->info->mode == 0) {
+			continue;
+		}
+		fi->ma->setVisible(visible);
+		if (mode < 0) mode = fi->info->mode; //    select mode of the first line
+	}
+	if (mode < 3) {
+		vLineMarker.setVisible(visible);
+	}
+
+}
+
+void Figure2::replot() {
+	plot1->replot();
+
 }
 
 void Figure2::drawMarker(double t) {
@@ -827,17 +867,24 @@ void Figure2::drawMarker(double t) {
 
     for (std::list<FigureItem*>::iterator it = lines.begin(); it != lines.end(); it++) {
 	    FigureItem* fi = *it;
-	    if (fi->info->mode == 0)  continue;
-	    fi->ma->setVisible(true);
+		if (fi->info->mode == 0) {
+			continue;
+		}
+
+	   // fi->ma->setVisible(true);
+
+
 	    fi->ma->setValue(fi->info->x[fi->info->ma.index], fi->info->y[fi->info->ma.index]);
+
+
 	    if (mode < 0) mode = fi->info->mode; //    select mode of the first line
     }
     if (mode < 3) {
-	    vLineMarker.setVisible(true);
-	    vLineMarker.setValue(t, 0);
+	   // vLineMarker.setVisible(true);
+	   vLineMarker.setValue(t, 0);
     }
 
-    plot1->replot(); // ?
+   // plot1->replot(); // ?
 }
 
 void Figure2::onClip(double t1, double t2) {

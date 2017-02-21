@@ -63,7 +63,7 @@ std::string getTemporalPath() {
     DWORD dwRetVal = 0;
     dwRetVal = GetTempPath(MAX_PATH,  lpTempPathBuffer); // buffer for path 
     if(dwRetVal > MAX_PATH || (dwRetVal == 0)) {
-	   xm_printf("*WARNING: cannot get access to tmp folder\n");
+	   xm_printf("@WARNING: cannot get access to tmp folder\n");
 	   return ret;
     }
     ret = tchar2stdstring(lpTempPathBuffer);
@@ -86,7 +86,7 @@ std::string getCommonAppDataPath() {  //CSIDL_COMMON_APPDATA
     bool ok = false;
     ok = SHGetSpecialFolderPath(0, buf, CSIDL_COMMON_APPDATA, TRUE);
     if(!ok) {
-	   xm_printf("*WARNING: cannot get access to COMMON_APPDATA folder\n");
+	   xm_printf("@WARNING: cannot get access to COMMON_APPDATA folder\n");
 	   return ret;
     }
     ret = tchar2stdstring(buf);
@@ -100,10 +100,14 @@ std::string getCurrentPath() {
 	TCHAR wd_buf[MAX_PATH];
 	DWORD dwRet;
 	dwRet = GetCurrentDirectory(MAX_PATH, wd_buf);
+#ifdef _UNICODE
 	std::wstring wide_wd(&wd_buf[0]);
 	std::string working_dir(wide_wd.begin(), wide_wd.end());
-
 	return working_dir;
+#else
+	std::string sbuf(&wd_buf[0]);
+	return sbuf;
+#endif
 }
 
 #endif
@@ -128,10 +132,29 @@ std::string getCommonAppDataPath() {
 #include "build_info.h"
 #include "build_number.h"
 int xqversion(char* vstr) {
-	int bs = sprintf(vstr, "\n(%s) v %s; bn #%s; compiled %s",
-		XQX9STR(OURPROJECTNAME), VERSION, BUILD_NUMBER, COMPILE_TIME);
+	int bs = sprintf(vstr, "\n(%s) v %s; bn #%s; compiled %s, platform %s",
+		XQX9STR(OURPROJECTNAME), VERSION, BUILD_NUMBER, COMPILE_TIME, OUR_PLATFORM);
 	return bs;
 }
+int xqversion(char* vstr, int bufSize) {
+	int bs = sprintf_s(vstr, bufSize,  "\n(%s) v %s; bn #%s; compiled %s, platform %s",
+		XQX9STR(OURPROJECTNAME), VERSION, BUILD_NUMBER, COMPILE_TIME, OUR_PLATFORM);
+	return bs;
+}
+
+#ifdef WIN32
+int xqversion(char* vstr, int bufSize, void* hModule) {
+	int bs = xqversion(vstr, bufSize);
+
+	char dllPath[MAX_PATH];
+	DWORD dw = GetModuleFileNameA((HMODULE)(hModule), dllPath, MAX_PATH);
+
+	dllPath[MAX_PATH-1] = 0; dllPath[MAX_PATH-2] = 0;
+	int ret = sprintf_s(vstr + bs, bufSize - bs, " loaded from %s", dllPath);
+	return ret;
+}
+#endif
+
 #endif
 
 
@@ -196,18 +219,44 @@ int xm_printf_vsdebug(const char * _Format, ...) {
 }
 #endif
 
-long long  findClosestPoint_1(long long  i1, long long i2, double* v, double x) {
+long long findClosestPoint_2(long long i1, long long i2, const double* v, double x) {
 	long long i3;
 	if (v == 0) {
 		mxat(v != 0);
 		return 0;
 	}
 	mxat(i2 > i1);
-#ifdef _DEBUG
-	if (i2 <= i1) {
-		int itmp = 0;
+	if (x >= v[i2]) return i2;
+	if (x <= v[i1]) return i1;
+	
+	long long z = (x - v[i1])* (i2 - i1) / (v[i2] - v[i1]) + i1;
+
+	return z;
+
+	const long long bo = 10;
+	long long i11 = z - bo;
+	long long i22 = z + bo;
+	if (i11 < i1) i11 = i1;
+	if (i22 > i2) i22 = i2;
+
+	z = findClosestPoint_1(i11, i22, v, x);
+	if (z == i11) { //   lower bound
+		return  findClosestPoint_1(i1, i11, v, x);
 	}
-#endif
+	if (z == i22) { //  upper bound
+		return  findClosestPoint_1(i22, i2, v, x);
+	}
+
+	return z;
+}
+
+long long  findClosestPoint_1(long long  i1, long long i2, const double* v, double x) {
+	long long i3;
+	if (v == 0) {
+		mxat(v != 0);
+		return 0;
+	}
+	mxat(i2 > i1);
 	if (x >= v[i2]) return i2;
 	if (x <= v[i1]) return i1;
 
@@ -248,7 +297,7 @@ bool eexists(const std::string& fn) {
 	   e = exists(fn);
     } catch(const filesystem_error& ex) {
 	   e = false;
-	   xm_printf("*WARNING: cannot access file %s (%s) ((no permission?)) \n",
+	   xm_printf("@WARNING: cannot access file %s (%s) ((no permission?)) \n",
 		  fn.c_str(), ex.what());
     }
 
@@ -262,7 +311,6 @@ boost::posix_time::ptime local_ptime_from_utc_time_t(std::time_t const t) {
     boost::posix_time::ptime ret = c_local_adjustor<ptime>::utc_to_local(from_time_t(t));
     return ret;
 }
-
 
 
 #endif

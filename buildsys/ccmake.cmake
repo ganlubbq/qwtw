@@ -12,6 +12,7 @@
 #    ourPlatform  - destination platform ID
 #    ourLibSuffix  -  where to put everything (like install-prefix)
 
+
 macro (setPlatformName)
 	include(CMakeParseArguments)
 	if (UNIX)
@@ -62,11 +63,32 @@ macro (setPlatformName)
 	# look for buildsys folder:
 	find_path(OUR_BUILDFOLDER buildsys PATHS ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH)
 	if (NOT OUR_BUILDFOLDER)
-		message(STATUS " warning: can not find buildsys directory")
+		message(STATUS "[${PROJECT_NAME}]:  warning: can not find buildsys directory")
 	else()
-		message(STATUS " found buildsys in ${OUR_BUILDFOLDER}")	
+		message(STATUS "[${PROJECT_NAME}]:  found buildsys in ${OUR_BUILDFOLDER}")	
 	endif()
-	message(STATUS  " detected platform: " ${ourPlatform}; " output dir:  " ${ourLibSuffix})
+	message(STATUS  "[${PROJECT_NAME}]:  detected platform: " ${ourPlatform}; " output dir:  " ${ourLibSuffix})
+endmacro()
+
+
+
+# substruct list2 from list1
+# on the output, list1 = list1 - list2;    and after that list2 = list2 + list1
+#
+macro (sub_list list1 list2)
+	#message(STATUS "[${PROJECT_NAME}]: sub_list begin. (list1 =  ${${list1}}    list2 = ${${list2}};     argn = ${ARGN}")
+	foreach (list2_item ${${list2}})
+		list(FIND ${list1} ${list2_item} find_result)
+		if (${find_result} EQUAL -1)
+			#message(STATUS "[${PROJECT_NAME}]: sub_list: got new item ( ${list2_item} ) in 'list1' ")
+		else()
+			#message(STATUS "[${PROJECT_NAME}]: sub_list: removing item ( ${list2_item} ) from 'list1' ")
+			list(REMOVE_AT  ${list1} find_result)
+		endif()
+		list(APPEND ${list2} ${${list1}})
+		list(REMOVE_DUPLICATES ${list2})
+	endforeach()
+	#message(STATUS "[${PROJECT_NAME}]: sub_list end. (list1 =  ${${list1}}    list2 = ${${list2}};     argn = ${ARGN}")
 endmacro()
 
 # add boost libs and headers
@@ -77,11 +99,41 @@ macro (addBoost)
 	set (BOOST_LIBRARYDIR $ENV{BOOST_LIBRARYDIR})
 	add_definitions(-DBOOST_ALL_DYN_LINK)
 	add_definitions(-DUSING_BOOST_LIBRARY)
-	message(STATUS  " adding BOOST: root = " ${BOOST_ROOT} ; " lib dir = " ${BOOST_LIBRARYDIR} )
-	find_package(Boost ${boost_version} REQUIRED COMPONENTS ${ARGN})
-	list(APPEND INC_DIR_LIST ${Boost_INCLUDE_DIRS}) 
-	list(APPEND LIB_LIST ${Boost_LIBRARIES})
+	message(STATUS  "[${PROJECT_NAME}]: adding BOOST: root = " ${BOOST_ROOT} ; " lib dir = " ${BOOST_LIBRARYDIR} )
+	
+	if (NOT OUR_BOOST_COMPONENTS_LIST)
+		set (OUR_BOOST_COMPONENTS_LIST ${ARGN})
+		find_package(Boost ${boost_version} REQUIRED COMPONENTS ${OUR_BOOST_COMPONENTS_LIST})
+		set (OUR_BOOST_LIBRARIES_LIST ${Boost_LIBRARIES})
+		set (OUR_BOOST_INCLUDE_LIST ${Boost_INCLUDE_DIRS})
+	else()
+		#message(STATUS "[${PROJECT_NAME}]: add-boost-begin: OUR_BOOST_COMPONENTS_LIST = ${OUR_BOOST_COMPONENTS_LIST}")
+		set (tmplist1 ${ARGN})
+		#message(STATUS "[${PROJECT_NAME}]: addBoost: (list1 =  ${tmplist1};    list2 = ${OUR_BOOST_COMPONENTS_LIST}")
+		sub_list(tmplist1 OUR_BOOST_COMPONENTS_LIST)
+		if (tmplist1)
+			message(STATUS "[${PROJECT_NAME}]: updating BOOST components list; new components: ${tmplist1}")
+			set (OUR_BOOST_COMPONENTS_LIST ${OUR_BOOST_COMPONENTS_LIST} PARENT_SCOPE)
+			
+			find_package(Boost ${boost_version} REQUIRED COMPONENTS ${tmplist1})
+			
+			list(APPEND OUR_BOOST_INCLUDE_LIST ${Boost_INCLUDE_DIRS}) 
+			list(APPEND OUR_BOOST_LIBRARIES_LIST ${Boost_LIBRARIES})  
+			
+			list(REMOVE_DUPLICATES OUR_BOOST_INCLUDE_LIST)
+			list(REMOVE_DUPLICATES OUR_BOOST_LIBRARIES_LIST)
+			
+			set (OUR_BOOST_INCLUDE_LIST ${OUR_BOOST_INCLUDE_LIST} PARENT_SCOPE)
+			set (OUR_BOOST_LIBRARIES_LIST ${OUR_BOOST_LIBRARIES_LIST} PARENT_SCOPE)
+		endif()
+		
+	endif()
+	
+	list(APPEND INC_DIR_LIST ${OUR_BOOST_INCLUDE_LIST}) 
+	list(APPEND ${L_LIST} ${OUR_BOOST_LIBRARIES_LIST})  
+	
 	#message(STATUS boost libs:  ${Boost_LIBRARIES})
+	message(STATUS "[${PROJECT_NAME}]: add-boost-end: OUR_BOOST_COMPONENTS_LIST = ${OUR_BOOST_COMPONENTS_LIST}")
 endmacro()
 
 # add QT5 macro
@@ -95,10 +147,14 @@ macro (addQT)
 	set (QTDIR $ENV{QTDIR})  #  ? do we need this really?
 	list(APPEND CMAKE_PREFIX_PATH ${QTDIR})
 	# Find the Qt library
-	find_package(Qt5Core)
-	find_package(Qt5Gui)
-	find_package(Qt5Widgets)
-	list(APPEND LIB_LIST "Qt5::Core" "Qt5::Widgets" "Qt5::Gui")
+	if (NOT QT5_LIBRARIES_MINE)
+		message(STATUS "adding QT5 library for ${PROJECT_NAME} (platform ${ourPlatform})")
+		find_package(Qt5Core REQUIRED)
+		find_package(Qt5Gui REQUIRED)
+		find_package(Qt5Widgets REQUIRED)
+		set (QT5_LIBRARIES_MINE YES)
+	endif()
+	list(APPEND ${L_LIST} "Qt5::Core" "Qt5::Widgets" "Qt5::Gui")
 	set(AUTOGEN_TARGETS_FOLDER automoc)
 	
 	set(now_using_QT YES)
@@ -122,11 +178,17 @@ macro (addQT4)
 	list(APPEND CMAKE_PREFIX_PATH ${QTDIR})
 	
 	# Find the Qt library
-	find_package(Qt4 REQUIRED)
-	include(${QT_USE_FILE})
+	if (NOT QT4_LIBRARIES_MINE)
+		find_package(Qt4 4.8.7 REQUIRED)
+		message(STATUS "got QT libs for [${PROJECT_NAME}]  (platform ${ourPlatform}): ${QT_LIBRARIES}  ${QT_QTMAIN_LIBRARY}; files: ${QT_USE_FILE}; defs: ${QT_DEFINITIONS}")
+		include(${QT_USE_FILE})
+		set (QT4_LIBRARIES_MINE YES)
+	endif()
+	
+	
 	add_definitions(${QT_DEFINITIONS})
-	list(APPEND LIB_LIST  ${QT_LIBRARIES}   ${QT_QTMAIN_LIBRARY})
-	#list(APPEND LIB_LIST "Qt4::Core" "Qt4::Widgets" "Qt4::Gui")
+	list(APPEND ${L_LIST}  ${QT_LIBRARIES}   ${QT_QTMAIN_LIBRARY})
+	#list(APPEND ${L_LIST} "Qt4::Core" "Qt4::Widgets" "Qt4::Gui")
 	
 	
 	
@@ -152,7 +214,7 @@ macro (addQWTLinux)
 	)
 	IF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
 		SET(QWT_FOUND TRUE)
-		list(APPEND LIB_LIST ${QWT_LIBRARY})
+		list(APPEND ${L_LIST} ${QWT_LIBRARY})
 		list(APPEND INC_DIR_LIST ${QWT_INCLUDE_DIR})
 
 	else()
@@ -164,15 +226,19 @@ endmacro()
 
 
 macro (findOurLibs)
-	find_path(OUR_LIBRARY_DIR ${ourLibSuffix} PATHS ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH)
 	if (NOT OUR_LIBRARY_DIR)
-		#message(FATAL_ERROR " error: can not find " ${ourLibSuffix} " directory")
-		#lets create it!
-		file(MAKE_DIRECTORY ${OUR_BUILDFOLDER}/${ourLibSuffix})
-		set(OUR_LIBRARY_DIR ${OUR_BUILDFOLDER})
-	endif()
-	set(OUR_LIBRARY_DIR ${OUR_LIBRARY_DIR}/${ourLibSuffix})
-	message(STATUS "our libs are in " ${OUR_LIBRARY_DIR})
+		find_file(OUR_LIBRARY_DIR ${ourLibSuffix} PATHS ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH)
+		if (NOT OUR_LIBRARY_DIR)#lets create it!
+			set(OUR_LIBRARY_DIR ${OUR_BUILDFOLDER}/${ourLibSuffix})
+			IF (NOT EXISTS ${OUR_LIBRARY_DIR})
+				file(MAKE_DIRECTORY ${OUR_LIBRARY_DIR})
+			endif()
+			IF (NOT EXISTS ${OUR_LIBRARY_DIR})
+				message(FATAL_ERROR "project ${PROJECT_NAME}: cannot create   ${OUR_LIBRARY_DIR} folder")
+			endif()
+		endif()
+	endif()	
+	message(STATUS "project ${PROJECT_NAME}: our libs are in " ${OUR_LIBRARY_DIR})
 endmacro()
 
 # add build information to the source files list (curSrcList)
@@ -194,13 +260,13 @@ macro (addVersionInfo curSrcList)
 		message(FATAL_ERROR "can not find BUILDINFO_PY_SCRIPT (BUILD_SYSTEM_PATH = ${BUILD_SYSTEM_PATH}")
 	endif()
 	
-	set(BUILD_INFO_FILE ${CMAKE_CURRENT_SOURCE_DIR}/build_info.cpp) # We are going to create this file after version.txt will change, at compile time
+	set(BUILD_INFO_FILE "${CMAKE_BINARY_DIR}/build_info.cpp") # We are going to create this file after version.txt will change, at compile time
 	list(APPEND ${curSrcList} ${BUILD_INFO_FILE}) # append 'build_info.cpp' to the project
 	
-	set(BN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/build_number.cpp) 
+	set(BN_FILE "${CMAKE_BINARY_DIR}/build_number.cpp") 
 	list(APPEND ${curSrcList} ${BN_FILE}) # append 'build_number.cpp' to the project
-	if (NOT EXISTS ${BN_FILE}) 
-		file(WRITE ${BN_FILE}  "0")
+	if (NOT EXISTS ${BN_FILE})  # we need to create something, or project will not be created
+		file(WRITE ${BN_FILE}  " ")
 	endif()
 	
 	# recreate build info:
@@ -211,7 +277,7 @@ macro (addVersionInfo curSrcList)
 endmacro ()
 
 macro (addBuildNumber)
-	find_file(BN_INFO_FILE buildnumber.txt PATHS ./ ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH) # where is buildnumber.txt file?
+	find_file(BN_INFO_FILE buildnumber.txt PATHS ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/../  NO_DEFAULT_PATH) # where is buildnumber.txt file?
 	find_path(BUILD_SYSTEM_PATH buildsys PATHS . ../ ../../ ../../../ ../../../../  NO_DEFAULT_PATH) 
 	find_file(BN_PY_SCRIPT incbuildnumber.py PATHS ${BUILD_SYSTEM_PATH}/buildsys  NO_DEFAULT_PATH)
 	if (NOT BN_PY_SCRIPT) # cannot find one useful python script
@@ -221,18 +287,20 @@ macro (addBuildNumber)
 		
 	if (NOT BN_INFO_FILE)
 		message(STATUS " WARNING: cannot find build info file... creating the new one")
-		file(WRITE "../buildnumber.txt" "1")
-		find_file(BN_INFO_FILE buildnumber.txt PATHS ./ ../ ../../  NO_DEFAULT_PATH)
+		file(WRITE "${CMAKE_BINARY_DIR}/buildnumber.txt" "1")
+		find_file(BN_INFO_FILE buildnumber.txt PATHS ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/../  NO_DEFAULT_PATH) 
 		if (NOT BN_INFO_FILE)
 			message(FATAL_ERROR "ERROR in addBuildNumber: cannot create buildnumber.txt")
 		endif()
 	endif()
 	
-	set(BN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/build_number.cpp) 
-	add_custom_target(INC_BN_TARGET ALL  python ${BN_PY_SCRIPT} ${BN_INFO_FILE} ${BN_FILE} )
+	set(BN_FILE ${CMAKE_BINARY_DIR}/build_number.cpp) 
+	add_custom_target(INC_BN_${PROJECT_NAME} ALL  python ${BN_PY_SCRIPT} ${BN_INFO_FILE} ${BN_FILE} WORKING_DIRECTORY  ${CMAKE_BINARY_DIR}  COMMENT "creating new build number" VERBATIM)
+	#
+	#message(STATUS "PROJECT_NAME = ${PROJECT_NAME}; INC_BN_TARGET = ${INC_BN_TARGET}")
+	add_dependencies(${PROJECT_NAME} INC_BN_${PROJECT_NAME})
 	
-	message(STATUS "PROJECT_NAME = ${PROJECT_NAME}; INC_BN_TARGET = ${INC_BN_TARGET}")
-	add_dependencies(${PROJECT_NAME} INC_BN_TARGET)
+	#add_custom_command(TARGET ${PROJECT_NAME}PRE_BUILD COMMAND  python ARGS ${BN_PY_SCRIPT} ${BN_INFO_FILE} ${BN_FILE} WORKING_DIRECTORY  ${CMAKE_BINARY_DIR} COMMENT "creating new build number" VERBATIM)
 endmacro()
 
 
@@ -282,11 +350,11 @@ macro (addExtLibrary libNickname)
 		endif()
 					
 		if (EXISTS ${dName}) # we have got separate debug and release
-			list(APPEND releaseLibList optimized ${lName})
-			list(APPEND debugLibList debug ${dName})
+			list(APPEND ${LR_LIST} optimized ${lName})
+			list(APPEND ${LD_LIST} debug ${dName})
 			message(STATUS "${libNickname} added (release and debug)")
 		else()	# everything is in one place
-			list(APPEND LIB_LIST ${lName})
+			list(APPEND ${L_LIST} ${lName})
 			message(STATUS "${libNickname} added (release only)")
 		endif()
 	
@@ -299,21 +367,21 @@ macro (addExtLibrary libNickname)
 			set (thisLibFilesRelease)
 			file(GLOB thisLibFilesRelease "${extLibPlatformPath}/lib/release/*")
 			foreach (item ${thisLibFilesRelease})
-				list(APPEND releaseLibList optimized ${item})
+				list(APPEND ${LR_LIST} optimized ${item})
 			endforeach()
 		endif()
 		if (EXISTS "${extLibPlatformPath}/lib/debug")
 			set (thisLibFilesDebug)
 			file(GLOB thisLibFilesDebug "${extLibPlatformPath}/lib/debug/*")
 			foreach (item ${thisLibFilesDebug})
-				list(APPEND debugLibList debug ${item})
+				list(APPEND ${LD_LIST} debug ${item})
 			endforeach()
 		endif()
 		
 		set(thisLibFiles)
 		file(GLOB thisLibFiles "${extLibPlatformPath}/lib/*.lib")
 		if (thisLibFiles)
-			list(APPEND LIB_LIST ${thisLibFiles})
+			list(APPEND ${L_LIST} ${thisLibFiles})
 		endif()
 		
 		
@@ -335,19 +403,24 @@ macro (addExtLibrary libNickname)
 
 endmacro()
 
+# just add some library
+macro (addOtherLib)
+	list(APPEND ${L_LIST} ${ARGN})
+endmacro()
+
 # usage: addSourceFiles(path_to_our_files file1 file2 ...   file_n)
 # file names without extension
 macro (addSourceFiles groupName sourceFilesPath)
 	#GET_FILENAME_COMPONENT(ourGroupName ${sourceFilesPath} NAME)
 	#message(STATUS "source group ${ourGroupName} was added")
-	set(extList "cpp" "cc" "c" "h" "hpp" "hh")
+	set(extList ".cpp" ".cc" ".c" ".h" ".hpp" ".hh")
 	set(sFileList)
 	list(APPEND INC_DIR_LIST ${sourceFilesPath})
 	foreach(sfName ${ARGN})
 		set(currentFileList) # clear this list
 		foreach(ext ${extList})
 			set(aFile aFile-NOTFOUND)
-			set(aFileName "${sfName}.${ext}")
+			set(aFileName "${sfName}${ext}")
 			#message(STATUS "    looking for ${aFileName} in a ${sourceFilesPath}")
 			find_file(aFile ${aFileName} PATHS ${sourceFilesPath} NO_DEFAULT_PATH)
 			if(aFile) 
@@ -356,12 +429,27 @@ macro (addSourceFiles groupName sourceFilesPath)
 			endif()			
 			set(aFile aFile-NOTFOUND)
 		endforeach()
+		if (NOT currentFileList) # test without extencion
+			find_file(aFile ${sfName} PATHS ${sourceFilesPath} NO_DEFAULT_PATH)
+			if(aFile) 
+				list(APPEND currentFileList ${aFile})
+			endif()			
+			set(aFile aFile-NOTFOUND)
+		endif()
+		
 		if (NOT currentFileList) 
-			message(STATUS "error: in path ${sourceFilesPath}")
-			message(FATAL_ERROR "error: can not add file ${sfName}")
+			message(STATUS "tested following files: ")
+			foreach(ext ${extList})
+				message(STATUS "	${sfName}${ext}")
+			
+			endforeach()
+			message(FATAL_ERROR "error: in path ${sourceFilesPath} can not add file ${sfName}")
 		else()
-			list(APPEND SRC_LIST  ${currentFileList})
+			list(APPEND ${PROJ_SRC_FILES}  ${currentFileList})
 			list(APPEND sFileList  ${currentFileList})
+			
+			#message(STATUS "file ${sfName}: added as ${currentFileList}")
+			#message(STATUS "${PROJ_SRC_FILES} =  ${${PROJ_SRC_FILES}}")
 		endif()
 		
 	endforeach()
@@ -410,6 +498,34 @@ macro (commonStart)
 	set(CMAKE_VERBOSE_MAKEFILE OFF)
 	setPlatformName()
 	findOurLibs()
+	
+	set(PROJ_SRC_FILES  SL_${PROJECT_NAME})
+	set(L_LIST LIBS_${PROJECT_NAME})
+	set(LR_LIST LIBS_RELEASE_${PROJECT_NAME})
+	set(LD_LIST LIBS_DEBUG_${PROJECT_NAME})
+endmacro()
+
+macro (addOurLib)
+	set(ourRLib ourRLib-NOTFOUND)
+	set(ourDLib ourDLib-NOTFOUND)
+
+	foreach(ourLib ${ARGN})
+	    find_library(ourRLib "${ourLib}" PATHS ${OUR_LIBRARY_DIR}/release NO_DEFAULT_PATH)
+	    if (NOT ourRLib)
+	        message(FATAL_ERROR "error: project ${PROJECT_NAME}: can not find ${ourLib} (release) lib in ${OUR_LIBRARY_DIR}/release")
+	    endif()
+	    find_library(ourDLib "${ourLib}d" PATHS ${OUR_LIBRARY_DIR}/debug NO_DEFAULT_PATH)
+	    if (NOT ourDLib)
+	        message(FATAL_ERROR "error: can not find ${ourLib} (debug) lib ")
+	    endif()
+	    #message(STATUS "....adding " ${ourLib} " libraries " ${ourRLib} " and " ${ourDLib})
+
+	    list(APPEND ${LR_LIST}  optimized ${ourRLib})
+	    list(APPEND ${LD_LIST}  debug ${ourDLib})
+	    
+	    set(ourRLib ourRLib-NOTFOUND)
+	    set(ourDLib ourDLib-NOTFOUND)
+	endforeach()
 endmacro()
 
 # add libs from argn to release and debug lists;   libs are from our "lib" folder
@@ -420,7 +536,7 @@ macro(fillOurLibList  releaseLList debugLList)
 	foreach(ourLib ${ARGN})
 	    find_library(ourRLib "${ourLib}" PATHS ${OUR_LIBRARY_DIR}/release NO_DEFAULT_PATH)
 	    if (NOT ourRLib)
-	        message(FATAL_ERROR "error: can not find ${ourLib} (release) lib in ${OUR_LIBRARY_DIR}/release")
+	        message(FATAL_ERROR "error: project ${PROJECT_NAME}: can not find ${ourLib} (release) lib in ${OUR_LIBRARY_DIR}/release")
 	    endif()
 	    find_library(ourDLib "${ourLib}d" PATHS ${OUR_LIBRARY_DIR}/debug NO_DEFAULT_PATH)
 	    if (NOT ourDLib)
@@ -457,7 +573,7 @@ macro (commonEnd   libType)
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${OUR_LIBRARY_DIR}/release")
 
 	if (USE_QT)
-		if (${USE_QT} STREQUAL YES )
+		if (${USE_QT})
 			#http://qt-project.org/wiki/toStdWStringAndBuiltInWchar : 
 			# not work with boost and sometimes with std set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
 			addQT()
@@ -466,27 +582,33 @@ macro (commonEnd   libType)
 	
 	add_definitions(-DNOMINMAX)
 	add_definitions(-DOURPROJECTNAME=${PROJECT_NAME}) # this can be used in 'version()' function
-	list(APPEND CMAKE_C_FLAGS_DEBUG	-D_DEBUG -DBUILD123=1  -D_ITERATOR_DEBUG_LEVEL=0)
-	list(APPEND CMAKE_C_FLAGS_RELEASE	-D_SCL_SECURE_NO_WARNINGS -DNDEBUG -DBUILD123=2  -D_ITERATOR_DEBUG_LEVEL=0 )
+	IF(WIN32)
+		add_definitions(-DWIN32)
+	endif()
 	
-	addVersionInfo(SRC_LIST)
+	list(APPEND CMAKE_C_FLAGS_DEBUG	-D_DEBUG -DBUILD123=1 )
+	list(APPEND CMAKE_C_FLAGS_RELEASE	-D_SCL_SECURE_NO_WARNINGS -DNDEBUG -DBUILD123=2 )
+	
+	addVersionInfo(${PROJ_SRC_FILES})
 			
 	if(${libType} STREQUAL EXE)
 	
 		if (WIN32 AND now_using_QT)
 			if (${now_using_QT} STREQUAL YES )
 				
-				ADD_EXECUTABLE(${PROJECT_NAME}  WIN32 ${SRC_LIST})
+				ADD_EXECUTABLE(${PROJECT_NAME}  WIN32 ${${PROJ_SRC_FILES}})
 			else()
 				message(FATAL_ERROR "error: WIN32 = ${WIN32} and USE_QT=${USE_QT}")
 			endif()
 		else()
 			message(STATUS "creating EXE without QT support")
-			ADD_EXECUTABLE(${PROJECT_NAME} ${SRC_LIST})
+			ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJ_SRC_FILES}})
 		endif()
 		
 	else()
-		add_library(${PROJECT_NAME}  ${libType} ${SRC_LIST})
+		add_library(${PROJECT_NAME}  ${libType} ${${PROJ_SRC_FILES}})
+		
+		#message(STATUS "files: ${PROJ_SRC_FILES} = ${${PROJ_SRC_FILES}}")
 	endif()
 	
 	addBuildNumber()
@@ -510,7 +632,7 @@ macro (commonEnd   libType)
 				set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
 			endif()
 		endif()	
-		QT4_AUTOMOC(${SRC_LIST})
+		#QT4_AUTOMOC(${PROJ_SRC_FILES})
 		set_property(TARGET ${PROJECT_NAME} PROPERTY QT4_NO_LINK_QTMAIN ON)
 	endif()
 
@@ -523,7 +645,7 @@ macro (commonEnd   libType)
 
 
 	if(WIN32 AND MSVC) 
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /EHsc")
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:fast /O2  /Ob2 /Oi /Ot /Qpar /openmp")
 		
 		# 4101 unreferenced local variable
@@ -550,7 +672,7 @@ macro (commonEnd   libType)
 	#	PROPERTIES    COMPILE_DEFINITIONS_DEBUG _DEBUG
 	#	COMPILE_DEFINITIONS_RELEASE 
 	
-	#set(CMAKE_CXX_FLAGS_RELEASE  ${CMAKE_CXX_FLAGS_RELEASE} -D_SCL_SECURE_NO_WARNINGS -DNDEBUG -DBUILD123=2  -D_ITERATOR_DEBUG_LEVEL=0 )
+	#set(CMAKE_CXX_FLAGS_RELEASE  ${CMAKE_CXX_FLAGS_RELEASE} -D_SCL_SECURE_NO_WARNINGS -DNDEBUG -DBUILD123=2 )
 	
 	foreach(ourGroup  ${ourGroupNames})
 		source_group(${ourGroup} FILES ${group_${ourGroup}_files})
@@ -560,22 +682,23 @@ macro (commonEnd   libType)
 	endforeach()
 	
 	if (OUR_LIB_LIST) # if we have some libs to add
-		fillOurLibList(releaseLibList  debugLibList  ${OUR_LIB_LIST})
+		fillOurLibList(${LR_LIST}  ${LD_LIST}  ${OUR_LIB_LIST})
 	endif()
 	if(NOT(${libType} STREQUAL STATIC))
 	
-		target_link_libraries(${PROJECT_NAME}  ${LIB_LIST}   ${debugLibList}   ${releaseLibList} )
+		target_link_libraries(${PROJECT_NAME}  ${${L_LIST}}   ${${LD_LIST}}   ${${LR_LIST}} )
 		
-		message(STATUS "debug lib list: " )
-		foreach(ourLib123 ${debugLibList})
-			message(STATUS "      " ${ourLib123})
-		endforeach()
+		#message(STATUS "debug lib list: " )
+		#foreach(ourLib123 ${${LD_LIST}})
+		#	message(STATUS "      " ${ourLib123})
+		#endforeach()
+		
 		#message("release lib list: " )
-		#foreach(ourLib123 ${releaseLibList})
+		#foreach(ourLib123 ${${LR_LIST}})
 		#	message("      " ${ourLib123})
 		#endforeach()
 		#message(" _common_ lib list: " )
-		#foreach(ourLib123 ${LIB_LIST})
+		#foreach(ourLib123 ${${L_LIST}})
 		#	message("      " ${ourLib123})
 		#endforeach()
 

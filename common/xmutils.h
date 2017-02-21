@@ -125,7 +125,11 @@ std::string getCommonAppDataPath();
 	@return index for the point, closest to 'x'
 	TODO: make it faster
 */
-long long findClosestPoint_1(long long i1, long long i2, double* v, double x);
+long long findClosestPoint_1(long long i1, long long i2, const double* v, double x);
+
+/**  just a wrapper for a function above.
+*/
+long long findClosestPoint_2(long long i1, long long i2, const double* v, double x);
 
 /** remove zeros from the end of the string
 
@@ -142,6 +146,56 @@ int stripTrailingZeros(char* s);
 */
 bool eexists(const std::string& fn);
 boost::posix_time::ptime local_ptime_from_utc_time_t(std::time_t const t);
+
+#include <boost/circular_buffer.hpp>
+#include <boost/thread/mutex.hpp>
+//#include <boost/thread/condition.hpp>
+//#include <boost/thread/thread.hpp>
+
+template <class T> class bounded_buffer {
+public:
+	typedef boost::circular_buffer<T> container_type;
+	typedef typename container_type::size_type size_type;
+	typedef typename container_type::value_type value_type;
+	typedef typename boost::call_traits<value_type>::param_type param_type;
+
+	explicit bounded_buffer(size_type capacity) : m_container(capacity) {}
+
+	void push(typename boost::call_traits<value_type>::param_type item) { // `param_type` represents the "best" way to pass a parameter of type `value_type` to a method.
+		boost::mutex::scoped_lock lock(m_mutex);
+		m_container.push_back(item);
+
+		lock.unlock();
+	}
+
+	bool pop(value_type* pItem) {
+		boost::mutex::scoped_lock lock(m_mutex);
+		bool ret = false;
+		if (!m_container.empty()) {
+			//*pItem = m_container[--m_unread];
+			*pItem = m_container.front();
+			m_container.pop_front();
+			return true;
+		}
+		lock.unlock();
+		return ret;
+	}
+
+	int size() {
+		boost::mutex::scoped_lock lock(m_mutex);
+		int s = m_container.size();
+		lock.unlock();
+		return  s;
+	}
+
+
+private:
+	bounded_buffer(const bounded_buffer&);              // Disabled copy constructor.
+	bounded_buffer& operator=(const bounded_buffer&); // Disabled assign operator.
+
+	container_type m_container;
+	boost::mutex m_mutex;
+}; //
 
 #endif
 
@@ -213,6 +267,11 @@ private:
 	warning: there is no any check for vstr size; 
 */
 	int xqversion(char* vstr);
+	int xqversion(char* vstr, int bufSize);
+#ifdef WIN32
+	int xqversion(char* vstr, int bufSize, void* hModule);
+#endif
+
 #endif
 
 

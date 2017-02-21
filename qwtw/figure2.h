@@ -122,8 +122,10 @@ public:
 	virtual void ylabel(const std::string& s);
 	virtual void drawMarker(double X, double Y, int type = 1);
 	virtual void drawMarker(double t);
+	virtual void makeMarkersVisible(bool visible);
 	virtual void addLine(LineItemInfo* line);
 	virtual void onClip(double t1, double t2);
+	virtual void replot();
 
 	void setAxesEqual();
 

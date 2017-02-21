@@ -6,7 +6,7 @@
 #include "xstdef.h"
 #include "justaplot.h"
 #include "coordtypes.h"
-#include "marble/GeoDataLineString.h"
+//#include "marble/GeoDataLineString.h"
 
 
 class MWidgetEx;

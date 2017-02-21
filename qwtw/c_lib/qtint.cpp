@@ -15,6 +15,7 @@
 // ################################################################
 // ################################################################
 
+HMODULE qwtwLibModule = 0;
 QWController* qwtController = 0;
 QWTest* qwTest = 0;
 QApplication* qApp123 = 0;
@@ -232,6 +233,23 @@ void QWTest::onInfo(BQInfo x) {
 	};
 }
 
+
+BOOL APIENTRY DllMain(HMODULE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved
+) {
+	switch (ul_reason_for_call) {
+	case DLL_PROCESS_ATTACH:
+		qwtwLibModule = hModule;
+	break;
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+	break;
+	}
+	return TRUE;
+}
+
 void startQT_2();
 void startQT_1() {
 	//bt = new boost::thread(boost::bind(startQT_2, (void*)0));
@@ -242,8 +260,8 @@ void startQT_1() {
 void startQT_2() {
 	mxassert(qApp123 == 0, "qtsMain::runQT error #1 ");
 	//  create arguments for QApplication:
-	static char argv0[256];
-	getExeFilePath(argv0, 255);
+	static char argv0[MAX_PATH];
+	getExeFilePath(argv0, MAX_PATH);
 
 	//#ifdef _DEBUG
 	if (argv0[0] == 0) {
@@ -275,7 +293,11 @@ void startQT_2() {
 	paths.append(qwtwSysPath.c_str());
 	QCoreApplication::setLibraryPaths(paths);
 
-	qApp123 = new QApplication(argc, argv);
+	if (!qApp) {
+		qApp123 = new QApplication(argc, argv);
+	} else {
+		qApp123 = qApp;
+	}
 	qApp123->setQuitOnLastWindowClosed(false);
 	//Q_INIT_RESOURCE(plib1);
 	//qtsMainWidget->setHidden(true);
@@ -289,6 +311,7 @@ void startQT_2() {
 	
     //xm_printf("\tQApplication created; starting QT \n");
 	//#endif
+	
 	qApp123->exec();
 
     //xm_printf("\tQApplication exec finished \n");

@@ -3,6 +3,7 @@
 #include "xstdef.h"
 #include "qwtw_c.h"
 #include "qtint.h"
+#include "xmutils.h"
 #include "build_info.h"
 #include "build_number.h"
 
@@ -21,10 +22,11 @@ qwtwc_API int get42(int n) {
     return 42;
 }
 
+
 qwtwc_API int qwtversion(char* vstr) {
-	int bs = sprintf(vstr, "\n(%s) v %s; bn #%s; compiled %s",
-		XQX9STR(OURPROJECTNAME), VERSION, BUILD_NUMBER, COMPILE_TIME);
-	return bs;
+	extern HMODULE qwtwLibModule;
+	return xqversion(vstr, 255, qwtwLibModule);
+
 }
 
 qwtwc_API void qwtfigure(int n) {

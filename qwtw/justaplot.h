@@ -71,6 +71,8 @@ public:
 
 	*/
 	virtual void addLine(LineItemInfo* line);
+	virtual void makeMarkersVisible(bool visible);
+	virtual void replot() {}
 
 signals:
 	void exiting(const std::string&);

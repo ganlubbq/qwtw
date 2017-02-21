@@ -1,4 +1,22 @@
 
+
+#define M_PI 3.14159265358979323846264338327950288419717
+
+#include <marble/GeoDataLineString.h>
+
+#include <marble/MarbleWidget.h>
+#include <marble/AbstractFloatItem.h>
+#include <marble/GeoDataDocument.h>
+#include <marble/GeoDataPlacemark.h>
+
+#include <marble/GeoDataTreeModel.h>
+#include <marble/MarbleModel.h>
+#include <marble/GeoPainter.h>
+#include <marble/MarbleDirs.h>
+#include <marble/GeoDataLatLonBox.h>
+
+#include <marble/LayerInterface.h>
+
 #include "xstdef.h"
 #include "sfigure.h"
 #include "xmcoords.h"
@@ -6,9 +24,9 @@
 
 #include <QLayout>
 #include <QLabel>
-
-#include <QTreeView>
 #include <QtCore/QDataStream>
+#include <QTreeView>
+
 #include <QtCore/QFile>
 #include <QtCore/QIODevice>
 #include <QBrush> 
@@ -16,17 +34,7 @@
 
 //#define M_PI 3.1415926535897932384626433832795
 //#include <marble/global.h>
-#include <marble/MarbleWidget.h>
-#include <marble/AbstractFloatItem.h>
-#include <marble/GeoDataDocument.h>
-#include <marble/GeoDataPlacemark.h>
-#include <marble/GeoDataLineString.h>
-#include <marble/GeoDataTreeModel.h>
-#include <marble/MarbleModel.h>
-#include <marble/GeoPainter.h>
-#include <marble/MarbleDirs.h>
 
-#include <marble/LayerInterface.h>
 
 #include "marbleview.h"
 
@@ -69,7 +77,10 @@ private:
 	};
 	struct Line {
 		LineItemInfo* info;
-		GeoDataLineString* geo;
+		Marble::GeoDataLineString* geo;
+
+		std::vector<Marble::GeoDataCoordinates> geoCoordsBackup;
+
 		double maxLat, maxLon, minLat, minLon;
 		Marker ma;
 	};
@@ -83,7 +94,7 @@ MWidgetEx::MWidgetEx(QWidget *parent): MarbleWidget(parent) {
 }
 
 void MWidgetEx::addLine(LineItemInfo* line) {
-	GeoDataLineString* s = new GeoDataLineString;
+	Marble::GeoDataLineString* s = new Marble::GeoDataLineString();
 	s->setTessellationFlags(Marble::NoTessellation);
 	s->clear();
 	int i;
@@ -92,12 +103,14 @@ void MWidgetEx::addLine(LineItemInfo* line) {
 	f.maxLon = line->x[0];
 	f.minLat = line->y[0];
 	f.minLon = line->x[0];
+	//f.geoCoordsBackup.resize(line->size);
 	for (i = 0; i < line->size; i++) {
 		s->append(Marble::GeoDataCoordinates(line->x[i], line->y[i], 0., Marble::GeoDataCoordinates::Degree));
 		if (f.maxLat < line->y[i]) f.maxLat = line->y[i];
 		if (f.minLat > line->y[i]) f.minLat = line->y[i];
 		if (f.maxLon < line->x[i]) f.maxLon = line->x[i];
 		if (f.minLon > line->x[i]) f.minLon = line->x[i];
+		//f.geoCoordsBackup[i] = Marble::GeoDataCoordinates(line->x[i], line->y[i], 0., Marble::GeoDataCoordinates::Degree);
 	}
 	f.info = line; f.geo = s;
 
@@ -137,6 +150,8 @@ void MWidgetEx::removeLines() {
 		s.geo->clear();
 		delete s.geo;
 		s.geo = 0;
+		s.geoCoordsBackup.clear();
+		std::vector<Marble::GeoDataCoordinates>().swap(s.geoCoordsBackup);
 	}
 	lines.clear();
 }
@@ -199,9 +214,9 @@ void MWidgetEx::customPaint(GeoPainter* painter) {
 			}
 
 			painter->setPen(pen);
-			GeoDataLineString* s = i->geo;
+			//GeoDataLineString* s = i->geo;
 			if (lineStyle != Qt::NoPen) {
-				painter->drawPolyline(*s);
+				painter->drawPolyline(*(i->geo));
 			} else {
 				pen.setStyle(Qt::SolidLine);
 				painter->setPen(pen);
@@ -210,7 +225,10 @@ void MWidgetEx::customPaint(GeoPainter* painter) {
 				//painter->drawPoints()
 				int symSize = i->info->symSize;
 				pen.setStyle(Qt::SolidLine);
-				for (QVector<GeoDataCoordinates>::ConstIterator it = s->constBegin(); it != s->constEnd(); it++) {
+				QVector<GeoDataCoordinates>::Iterator it;
+				for (it = i->geo->begin(); it != i->geo->end(); it++) {
+				//std::vector<Marble::GeoDataCoordinates>::iterator it;
+				//for (it = i->geoCoordsBackup.begin(); it != i->geoCoordsBackup.end(); it++) {
 					switch (symStyle) {
 						case 'e':	painter->drawEllipse(*it, symSize, symSize);  break;
 						case 'r':	painter->drawRect(*it, symSize, symSize);  break;
@@ -218,6 +236,7 @@ void MWidgetEx::customPaint(GeoPainter* painter) {
 
 					};
 				}
+				
 			}
 
 			// draw legend:

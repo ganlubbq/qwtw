@@ -7,6 +7,7 @@
 #include "lrbuf.h"
 #include "qtswidget.h"
 
+extern HMODULE qwtwLibModule;
 class QTSMainWidget;
 
 class QWController {

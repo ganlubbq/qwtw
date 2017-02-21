@@ -107,13 +107,32 @@ JustAplot::~JustAplot() {
 }
 
 void JustAplot::title(const std::string& s) {
-	setWindowTitle(s.c_str());
+	long long n = 0;
+	for (std::list<LineItemInfo*>::iterator it = linesInfo.begin(); it != linesInfo.end(); it++) {
+		LineItemInfo* i = *it;
+		n += i->size;
+	}
+	char np[64]; sprintf(np, " (%d points)", n);
+	std::string tmp = s;
+	tmp.append(np);
+
+	setWindowTitle(tmp.c_str());
 	name = s;
 }
 
  void JustAplot::footer(const std::string& s) {
 	
 }
+
+void JustAplot::makeMarkersVisible(bool visible) {
+	if (linesInfo.empty()) return;
+
+	for (std::list<LineItemInfo*>::iterator it = linesInfo.begin(); it != linesInfo.end(); it++) {
+		LineItemInfo* i = *it;
+		if (i->mode == 0) continue;
+		i->ma.active = visible;
+	}
+ }
 
  void JustAplot::drawMarker(double t) {
 	 if (linesInfo.empty()) return;
