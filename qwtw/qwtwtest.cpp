@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 
 	qwtplot3d(x3d + n3d, x3d + 2 * n3d, x3d + 3 * n3d, n3d, "3D test #2", "-b", 2, 5, x3d);
 
-	goto end;
+	//goto end;
 	// ------------- create first plot: ---------------------
 	qwtfigure(14);	//  set up ID for current plot
 
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 	// --------   map view test: draw on a map  ---------------------
 	t4[0] = sinusTime_1[0]; t4[1] = sinusTime_1[int(n1 / 4.)];
 	 t4[2] = sinusTime_1[int(n1 / 3.)]; 
-	t4[3] = sinusTime_1[int(n1 / 2.)]; t4[4] = sinusTime_1[n1 - 1];
+	t4[3] = sinusTime_1[int(n1 / 2.)]; 
 	topview(18);
 	qwtplot2(east, north, mwn, "test mw", "-rb", 2,  8, t4);
 	qwttitle("'marble' top view");

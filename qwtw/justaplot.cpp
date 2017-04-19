@@ -73,7 +73,12 @@ LineItemInfo::LineItemInfo(double* x_, double* y_, double* z_, size_t size_, std
 	}
 #endif
 
-	mode = 1;
+	if (time_ == 0) {
+		mode = 2;
+	} else {
+		mode = 3;
+	}
+
 	size = size_;
 	legend = legend_;
 

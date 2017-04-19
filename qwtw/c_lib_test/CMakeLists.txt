@@ -17,6 +17,8 @@ set(INC_DIR_LIST "../" "../c_lib"  "../../../common" "../../../xmatrix2" )
 addSourceFiles("source" "../" qwtwtest)	
 
 add_definitions(-DUNICODE -D_UNICODE -DUSE_QT3D )
+	add_definitions(-DUSEMARBLE)
+
 
 
 #addOurLib(qwtwc)

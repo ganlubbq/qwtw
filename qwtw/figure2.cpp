@@ -257,6 +257,7 @@ Figure2::Figure2(const std::string& key_, XQPlots* pf_, QWidget * parent) : Just
 	//plot1->setAxisScaleEngine(QwtPlot::yLeft, (QwtScaleEngine*)(new TestScaleEngine()));
 	//plot1->setAxisScaleEngine(QwtPlot::xBottom, (QwtScaleEngine*)(new TestScaleEngine()));
 
+	makeMarkersVisible(true);
 }
 
 Figure2::~Figure2() {
@@ -359,7 +360,7 @@ void Figure2::addLine(LineItemInfo* line) {
 	FigureItem* xd = new FigureItem(line, cl);
 
 	if (xd->info->mode != 0) {
-		xd->ma->setVisible(false);
+		xd->ma->setVisible(true);
 		xd->ma->attach(plot1);
 	}
 	lines.push_back(xd);

@@ -12,6 +12,7 @@ namespace QtDataVisualization {
 	class Q3DScatter;
 	class QAbstract3DGraph;
 	class QAbstract3DSeries;
+	class QScatter3DSeries;
 //	class QScatterDataArray;
 //	typedef QVector<QScatterDataItem> QScatterDataArray;
 }
@@ -46,6 +47,7 @@ protected slots:
 	void changeFont(const QFont &font);
 
 	void shadowQualityUpdatedByVisual(int sq);
+	void selectedItemChanged(int index);
 
 	void changeShadowQuality(int quality);
 	void setBackgroundEnabled(int enabled);
@@ -63,6 +65,7 @@ private:
 	int m_style;
 	bool m_smooth;
 	double m_fontSize;
+	std::map<QtDataVisualization::QScatter3DSeries*, LineItemInfo*> s;
 
 	QtDataVisualization::Q3DScatter* scatter;
 	//QtDataVisualization::QScatterDataArray data;

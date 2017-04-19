@@ -239,6 +239,57 @@ void Q3DView::onHome() {
 	//mw->onHome();
 }
 
+void Q3DView::selectedItemChanged(int index) {
+	using namespace QtDataVisualization;
+	QScatter3DSeries* series = (QScatter3DSeries*)sender();
+	if (series == 0) {
+		return;
+	}
+	std::map<QScatter3DSeries*, LineItemInfo* >::iterator it = s.find(series);
+	if (it == s.end()) {
+		return;
+	}
+	LineItemInfo* line = it->second;
+	if (line->size == 0) {
+		return;
+	}
+	if (index >= line->size) {
+		return;
+	}
+
+	emit onSelection(key);
+
+	char s[256];
+	sprintf(s, "[%.6f, %.6f, %.6f] (%lld points)", 
+		line->x[index], line->y[index], line->z[index], line->size);
+
+	// setWindowTitle(s.str().c_str());
+	setWindowTitle(s);
+
+	if (line->time != 0) {
+		pf->drawAllMarkers(line->time[index]);
+	}
+
+	pf->setAllMarkersVisible(true);
+}
+
+void Q3DView::drawMarker(double t) {
+	using namespace QtDataVisualization;
+
+	JustAplot::drawMarker(t);
+	std::map<QScatter3DSeries*, LineItemInfo* >::iterator it = s.begin();
+	while (it != s.end()) {
+		int i = it->second->ma.index;
+		if ((i >= 0) && (i < it->second->size)) {
+			it->first->setSelectedItem(i);
+		}
+		
+		it++;
+	}
+
+}
+
+
 void Q3DView::addLine(LineItemInfo* line) {
 	JustAplot::addLine(line);
 	mxat(line->z != 0);
@@ -246,9 +297,6 @@ void Q3DView::addLine(LineItemInfo* line) {
 		return;
 	}
 	using namespace QtDataVisualization;
-	//if (data == 0) {
-	//	data = new QScatterDataArray();
-	//}
 
 	QScatterDataProxy* proxy = new QScatterDataProxy;
 	QScatter3DSeries* series = new QScatter3DSeries(proxy);
@@ -265,9 +313,8 @@ void Q3DView::addLine(LineItemInfo* line) {
 	scatter->addSeries(series);
 
 
-}
-void Q3DView::drawMarker(double t) {
-	JustAplot::drawMarker(t);
-	//mw->drawMarker(t);
+	bool 	test = QObject::connect(series, SIGNAL(selectedItemChanged(int)), this,
+		SLOT(selectedItemChanged(int)));
+	s.insert(std::make_pair(series, line));
 }
 
