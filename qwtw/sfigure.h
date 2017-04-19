@@ -52,9 +52,9 @@ public:
 	XQPlots(QWidget * parent1 = 0);
 	~XQPlots();
 
-	/**    create a 2D plot with a number, or raise up  already created plot  
+	/**    create a plot with a number, or raise up  already created plot  
 		@param[in] n a plot number. There can be only one plot with this number in PlotFactory.
-		@param[in] type plot type; '1' - QWT plot; '2' - map (top view)
+		@param[in] type plot type; '1' - QWT plot; '2' - map (top view); '3' - 3D plot
 	*/
 	JustAplot* figure(int n, int type = 1);
 	JustAplot* figure(std::string name_, int type = 1);
@@ -82,6 +82,10 @@ public:
 	*/
 	void plot(double* x, double* y, int size, const char* name, const char* style, int lineWidth, int symSize,
 	    double* time = 0);
+
+	void plot(double* x, double* y, double* z, int size, const char* name, const char* style, int lineWidth, int symSize,
+		double* time = 0);
+
 
 	/**
 	@param[in] type type of marker; 1 - vertical line; 2 - point;

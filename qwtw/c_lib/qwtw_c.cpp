@@ -48,6 +48,17 @@ qwtwc_API void topview(int n) {
 	}
 }
 #endif
+#ifdef USE_QT3D
+qwtwc_API 	void qwtfigure3d(int n) {
+	if (qwtController == 0) {
+		startQWT();
+	}
+	if (qwtController != 0) {
+		qwtController->figure_3d(n);
+	}
+}
+#endif
+
 qwtwc_API void qwttitle(char* s) {
 	if (qwtController != 0 )
 	qwtController->title(s);
@@ -109,6 +120,16 @@ void qwtplot2(double* x, double* y, int size, char* name, const char* style,
 	   qwtController->plot(x, y, size, name, style, lineWidth, symSize, time);
     }
 }
+
+
+void qwtplot3d(double* x, double* y, double* z, int size, char* name, const char* style,
+	int lineWidth, int symSize, double* time) {
+	if (qwtController != 0) {
+		//qwtController->setmode(3);
+		qwtController->plot(x, y, z, size, name, style, lineWidth, symSize, time);
+	}
+}
+
 
  //  not working!
 qwtwc_API void qwtclose() {

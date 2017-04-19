@@ -284,7 +284,7 @@ void MWidgetEx::drawMarker(double t) {
 	update();
 }
 
-MarView::MarView(const std::string& key_, XQPlots* pf_, QWidget *parent) : JustAplot(key_, pf_, parent) {
+MarView::MarView(const std::string& key_, XQPlots* pf_, QWidget *parent) : JustAplot(key_, pf_, parent, 2) {
 	if (!mpWasSet) {
 		mpWasSet = true;
 #ifdef WIN32

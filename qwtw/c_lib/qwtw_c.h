@@ -43,6 +43,9 @@ qwtwc_API 	void qwtfigure(int n);
 */
 qwtwc_API 	void topview(int n);
 #endif
+#ifdef USE_QT3D
+qwtwc_API 	void qwtfigure3d(int n);
+#endif
 
 /** put a title on currently 'active' plot.
 	@param[in] s the title
@@ -143,6 +146,9 @@ qwtwc_API 	void qwtplot(double* x, double* y, int size, char* name, const char* 
 */
 qwtwc_API 	void qwtplot2(double* x, double* y, int size, char* name, const char* style, 
     int lineWidth, int symSize, double* time);
+
+qwtwc_API 	void qwtplot3d(double* x, double* y, double* z, int size, char* name, const char* style,
+	int lineWidth, int symSize, double* time);
 
 /** do not use it if all is working without it.
     This function will try to "close" QT library.  Craches sometimes.

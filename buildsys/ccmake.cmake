@@ -152,9 +152,12 @@ macro (addQT)
 		find_package(Qt5Core REQUIRED)
 		find_package(Qt5Gui REQUIRED)
 		find_package(Qt5Widgets REQUIRED)
+		find_package(Qt5OpenGL REQUIRED)
+		find_package(Qt5DataVisualization REQUIRED)
+		
 		set (QT5_LIBRARIES_MINE YES)
 	endif()
-	list(APPEND ${L_LIST} "Qt5::Core" "Qt5::Widgets" "Qt5::Gui")
+	list(APPEND ${L_LIST} "Qt5::Core" "Qt5::Widgets" "Qt5::Gui" "Qt5::OpenGL" "Qt5::DataVisualization")
 	set(AUTOGEN_TARGETS_FOLDER automoc)
 	
 	set(now_using_QT YES)
@@ -525,6 +528,12 @@ macro (addOurLib)
 	    
 	    set(ourRLib ourRLib-NOTFOUND)
 	    set(ourDLib ourDLib-NOTFOUND)
+	endforeach()
+endmacro()
+
+macro (addOurLib2)
+	foreach(ourLib ${ARGN})
+		list(APPEND ${L_LIST} ${ourLib})
 	endforeach()
 endmacro()
 

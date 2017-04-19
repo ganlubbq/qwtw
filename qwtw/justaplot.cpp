@@ -14,6 +14,7 @@ LineItemInfo::LineItemInfo(double* x_, double* y_, size_t size_, std::string leg
     mxassert(size_ > 0, "");
     x = x_;
     y = y_;
+	z = 0; //  2D plot
     time = time_;
     important = true;
 
@@ -46,10 +47,47 @@ LineItemInfo::LineItemInfo(double* x_, double* y_, size_t size_, std::string leg
 	}
 }
 
+LineItemInfo::LineItemInfo(double* x_, double* y_, double* z_, size_t size_, std::string legend_,
+	double* time_) {
+
+	mxassert(size_ > 0, "");
+	x = x_;
+	y = y_;
+	z = z_; //  3D plot
+	time = time_;
+	important = true;
+
+#ifdef REMEMBER_EVERYTHING
+
+	if (x_ != 0) {
+		x = new double[size_]; memcpy(x, x_, size_ * sizeof(double));
+	}
+	if (y_ != 0) {
+		y = new double[size_]; memcpy(y, y_, size_ * sizeof(double));
+	}
+	if (z_ != 0) {
+		z = new double[size_]; memcpy(z, z_, size_ * sizeof(double));
+	}
+	if (time_ != 0) {
+		time = new double[size_]; memcpy(time, time_, size_ * sizeof(double));
+	}
+#endif
+
+	mode = 1;
+	size = size_;
+	legend = legend_;
+
+	style = std::string();
+	lineWidth = 0; // default value ?????
+	symSize = 8;
+	sqwLine = 0;
+}
+
 LineItemInfo::~LineItemInfo() {
 #ifdef REMEMBER_EVERYTHING
 	if(x != NULL) delete[] x;
 	if(y != NULL) delete[] y;
+	if (z != NULL) delete[] z;
 	if(time != NULL) delete[] time;
 #endif
 
@@ -81,13 +119,14 @@ double findDistance(LineItemInfo* i, double x, double y, long long& index) {
 	return ret;
 }
 
-JustAplot::JustAplot(const std::string& key_, XQPlots* pf_, QWidget *parent) : QDialog(parent, 
+JustAplot::JustAplot(const std::string& key_, XQPlots* pf_, QWidget *parent, int type_) : QDialog(parent,
                                 Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint |
 				Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint) {
 	key = key_;
 	cInfo = 0;
 	pf = pf_;
 	name = key;
+	type = type_;
 
 	setAttribute(Qt::WA_DeleteOnClose);
 }
@@ -112,7 +151,7 @@ void JustAplot::title(const std::string& s) {
 		LineItemInfo* i = *it;
 		n += i->size;
 	}
-	char np[64]; sprintf(np, " (%d points)", n);
+	char np[64]; sprintf(np, " (%lld points)", n);
 	std::string tmp = s;
 	tmp.append(np);
 

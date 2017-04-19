@@ -6,6 +6,7 @@ cmake_minimum_required (VERSION 2.8.11)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../buildsys/")
 set(USE_QT YES)
 set(USE_MARBLE YES) # use marble-qt for 'top-view' data
+set(USE_QT3D YES) 
 include(ccmake)
 
 set(PROJECT_NAME qwtwc)
@@ -49,6 +50,14 @@ if (USE_MARBLE)
 	endif()
 endif()
 
+
+if (USE_QT3D)
+	add_definitions(-DUSE_QT3D)
+	addSourceFiles("qt-3d" "../qt-3d"   qt-3d)
+	
+
+endif()
+
 if(WIN32)
 	addExtLibrary(qwt VSTRING trunk RLNAME qwt)
 	#list(APPEND LIB_LIST "ws2_32.lib")
@@ -64,7 +73,7 @@ if (UNIX)
 	install(FILES qwtw_c.h   DESTINATION  include)
 endif()
 
-add_subdirectory(test)
+#add_subdirectory(test)
 
 # ========================================================
 #addSourceFilesSimple(testSrc "source" "."  qwtwtest)

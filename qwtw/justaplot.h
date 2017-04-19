@@ -12,6 +12,7 @@ class SQWLine;
 struct LineItemInfo {
 	double* x;
 	double* y;
+	double* z;
 	/** just a reference, supposed to be common for all the figures
 	   if "0", then reference maybe "x"
 	*/
@@ -41,6 +42,10 @@ struct LineItemInfo {
 
 	LineItemInfo(double* x_, double* y_, size_t size_, std::string legend_, 
 	    int mode_ = 1, double* time_ = 0);
+
+	/**  create 3D plot */
+	LineItemInfo(double* x_, double* y_, double* z_, size_t size_, std::string legend_,
+		double* time_ = 0);
 	~LineItemInfo();
 };
 
@@ -52,9 +57,9 @@ class JustAplot: public QDialog {
 public:
 	std::string key;
 	std::string name;
+	int type;
 
-
-	JustAplot(const std::string& key_, XQPlots* pf_, QWidget *parent);
+	JustAplot(const std::string& key_, XQPlots* pf_, QWidget *parent, int type_);
 	/**   it will 'delete' all the lines itself  
 	*/
 	virtual ~JustAplot();

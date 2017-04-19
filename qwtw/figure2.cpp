@@ -169,7 +169,7 @@ void  TestScaleEngine::autoScale( int maxNumSteps, double &x1, double &x2, doubl
 
 
 
-Figure2::Figure2(const std::string& key_, XQPlots* pf_, QWidget * parent) : JustAplot(key_, pf_, parent) {
+Figure2::Figure2(const std::string& key_, XQPlots* pf_, QWidget * parent) : JustAplot(key_, pf_, parent, 1) {
 	mode = 0;
 	//cf = 0;
 	tbModeChanging = false;

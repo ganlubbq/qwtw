@@ -26,8 +26,13 @@ public:
 #ifdef USEMARBLE
 	void figure_topview(int n);  // 7    (top view)
 #endif
+#ifdef USE_QT3D
+	void figure_3d(int n); // 8     3D plot
+#endif
 	void plot(double* x, double* y, int size, char* name, const char* style, 
 		  int lineWidth, int symSize, double* time = 0); // 5
+	void plot(double* x, double* y, double* z,  int size, char* name, const char* style,
+		int lineWidth, int symSize, double* time = 0);  // 20
 	void close(); // NOT WORKING
 	
 private:

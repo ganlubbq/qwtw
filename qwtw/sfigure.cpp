@@ -25,6 +25,9 @@
 #ifdef USEMARBLE
 #include "marbleview.h"
 #endif
+#ifdef USE_QT3D
+#include "qt-3d.h"
+#endif
 
 XQPlots::XQPlots(QWidget * parent1): QDialog(parent1) {
 	parent = parent1;
@@ -90,18 +93,24 @@ JustAplot* XQPlots::figure(std::string name_, int type) {
 
 	}   else  {
 
-
-
-
 		switch(type) {
 		case 1:
 			cf	= new Figure2(name_, this, parent);
 			break;
 #ifdef USEMARBLE
-		case 2:
+		case 2: {
 			MarView* tvp = new MarView(name_, this, parent);
 			tvp->mvInit();
 			cf = tvp;
+			}
+			break;
+#endif
+#ifdef USE_QT3D
+		case 3: {
+			Q3DView* q3 = new Q3DView(name_, this, parent);
+			q3->q3Init();
+			cf = q3;
+		}
 			break;
 #endif
 		}
@@ -312,6 +321,35 @@ void  XQPlots::plot(double* x, double* y, int size, const char* name,
 	//it will be deleted in 'cf' destructor
 	LineItemInfo* i = new LineItemInfo(x, y, size, name, mode, time);
 	i->style = style; 
+	i->lineWidth = lineWidth;
+	i->symSize = symSize;
+	i->important = currentImportanceMode;
+
+	cf->addLine(i);
+}
+
+void  XQPlots::plot(double* x, double* y, double* z, int size, const char* name,
+	const char* style, int lineWidth, int symSize,
+	double* time) {
+	mxassert((x != 0) && (y != 0) && (z != 0) && (size > 0) && (name != 0) && (style != 0), "");
+	if (cf == 0) {
+		figure(0, 3);
+	} else { ///  check:
+		mxat(cf->type == 3);
+		if (cf->type != 3) {
+			return;
+		}
+	}
+
+	//int mode = currentFigureMode;
+	int mode = 2;
+	if (time != 0) {
+		mode = 3;
+	}
+
+	//it will be deleted in 'cf' destructor
+	LineItemInfo* i = new LineItemInfo(x, y, z, size, name, time);
+	i->style = style;
 	i->lineWidth = lineWidth;
 	i->symSize = symSize;
 	i->important = currentImportanceMode;

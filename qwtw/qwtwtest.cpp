@@ -25,6 +25,9 @@ double* y4;
 double* y5;
 double* y6;
 
+const int n3d = 100;
+double* x3d;
+
 const int nns = 10000;
 double xs[nns], ys[nns], ys1[nns];
 double delta;
@@ -40,6 +43,13 @@ void createInfo();
 int main(int argc, char* argv[]) {
 	createInfo(); //    fill in all data arrays
 
+
+	//  3D test:
+	qwtfigure3d(0);
+
+	qwtplot3d(x3d + n3d, x3d + 2 * n3d, x3d + 3 * n3d, n3d, "3D test #2", "-b", 2, 5, x3d);
+
+	goto end;
 	// ------------- create first plot: ---------------------
 	qwtfigure(14);	//  set up ID for current plot
 
@@ -84,6 +94,7 @@ int main(int argc, char* argv[]) {
 	qwttitle("'marble' top view");
 #endif
 
+end:;
 	//  --------- show 'main control window' ----------
 	//  this is very useful when you have  about 20 plots 
 	qwtshowmw();
@@ -99,7 +110,7 @@ int main(int argc, char* argv[]) {
 	delete[] y4;
 	delete[] y5;
 	delete[] y6;
-
+	delete[] x3d;
 	return 0;
 }
 
@@ -140,6 +151,17 @@ void createInfo() {
 		y4[i] = cos(x4[i] * 0.9) + sin(x4[i] * 1.1);
 		y5[i] = cos(x4[i] * 0.4) - sin(x4[i] * 1.5);
 		y6[i] = cos(x4[i] * 0.2) + sin(x4[i] * 1.15);
+	}
+
+
+	x3d = new double[n3d * 4];
+	double r = 5.;
+	for (i = 0; i < n3d; i++) {
+		x3d[i] = i * 0.1; //  time?
+		double a = i * 2. * 3.14159 * 4. / (double)(n3d);
+		x3d[i + n3d] = sin(a) * r;
+		x3d[i + 2*n3d] = cos(a) * r;
+		x3d[i + 3 * n3d] = i * 8. / ((double)(n3d));
 	}
 
 }

@@ -94,6 +94,14 @@ void QWController::figure_topview(int n) {
 }
 #endif
 
+#ifdef USE_QT3D
+void QWController::figure_3d(int n) {
+	char m[64]; XQByteBuffer b(m, false);
+	b.putInt(n);
+	send(8, m, b.getSize());
+}
+#endif
+
 void QWController::title(char* s) {
 	char m[256]; XQByteBuffer b(m, 255);
 	b.putString(s); 
@@ -142,6 +150,15 @@ void QWController::plot(double* x, double* y, int size, char* name, const char* 
 	b.putDPtr(time);
 	send(5, m, b.getSize(), true);
 }
+void QWController::plot(double* x, double* y, double* z, int size, char* name, const char* style,
+	int lineWidth, int symSize, double* time) {
+	char m[256];  int k = 0;
+	XQByteBuffer b(m, false);
+	b.putDPtr(x); b.putDPtr(y);  b.putDPtr(z); b.putInt(size);
+	b.putString(name);  b.putString(style);  b.putInt(lineWidth); b.putInt(symSize);
+	b.putDPtr(time);
+	send(20, m, b.getSize(), true);
+}
 
 // ################################################################
 // ################################################################
@@ -172,6 +189,7 @@ void QWTest::onInfo(BQInfo x) {
 	char style[8];
 	double* xx;
 	double* yy;
+	double* zz;
 	double* time = 0;
 	int size, linewidth, symsize;
 
@@ -207,6 +225,17 @@ void QWTest::onInfo(BQInfo x) {
 		pf->plot(xx, yy, size, str1, style, linewidth, symsize, time);
 		sendReply(); //    notify 'host' that it can return from function and free the memory
 		break;
+	case 20: // plot  3D
+		xx = b.getDPtr(); yy = b.getDPtr(); zz = b.getDPtr();
+		size = b.getInt(); b.getString(str1); b.getString(style);
+
+		linewidth = b.getInt(); symsize = b.getInt();
+		time = b.getDPtr();
+		pf->plot(xx, yy, zz, size, str1, style, linewidth, symsize, time);
+		sendReply(); //    notify 'host' that it can return from function and free the memory
+		//   since we supposed to copy everything already
+		break;
+	
 	case 6:
 	   mode = b.getInt();
 	   pf->setmode(mode);
@@ -218,6 +247,14 @@ void QWTest::onInfo(BQInfo x) {
 		pf->figure(n, 2);
 		break;
 #endif
+#ifdef USE_QT3D
+	case 8: //  3D
+		n = b.getInt();
+		pf->figure(n, 3);
+		break;
+#endif
+
+
 	case 10:  //   important status
 		pf->setImportant(b.getInt() != 0);
 		break;
