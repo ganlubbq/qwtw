@@ -331,6 +331,8 @@ void Figure2::title(const std::string& s) {
 	plot1->setTitle(title);
 
 	JustAplot::title(s);
+
+	zoomer->zoom(0);
 	//plot1->setFooter(s.c_str());
 }
 void Figure2::footer(const std::string& s) {
@@ -500,10 +502,10 @@ void Figure2::addLine(LineItemInfo* line) {
 	}
 
 	plot1->updateAxes();
-	zoomer->setZoomBase(true);
+	//zoomer->setZoomBase(true);
 	plot1->setAutoReplot(doReplot);
 	//plot1->replot();
-	zoomer->setZoomBase();
+	zoomer->setZoomBase(false);
 }
 
 void Figure2::setupUi()     {
@@ -948,8 +950,11 @@ void Figure2::onClip(double t1, double t2) {
 		}
 	}
 	//plt->setAxisScale(xAxis(), x1, x2);
-	plot1->setAxisScale(plot1->xBottom, xMin, xMax);
-	plot1->setAxisScale(plot1->yLeft, yMin, yMax);
+	//plot1->setAxisScale(plot1->xBottom, xMin, xMax);
+	//plot1->setAxisScale(plot1->yLeft, yMin, yMax);
+
+	QRectF zr(xMin, yMin, xMax - xMin, yMax - yMin);
+	zoomer->zoom(zr);
 
 	plot1->replot(); // ?
 }

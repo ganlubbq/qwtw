@@ -27,6 +27,8 @@ double* y6;
 
 const int n3d = 100;
 double* x3d;
+const int n3d2 = 5;
+double* x3d2;
 
 const int nns = 10000;
 double xs[nns], ys[nns], ys1[nns];
@@ -47,7 +49,10 @@ int main(int argc, char* argv[]) {
 	//  3D test:
 	qwtfigure3d(0);
 
-	qwtplot3d(x3d + n3d, x3d + 2 * n3d, x3d + 3 * n3d, n3d, "3D test #2", "-b", 2, 5, x3d);
+	qwtplot3d(x3d + n3d, x3d + 2 * n3d, x3d + 3 * n3d, n3d, "3D test #2", "-r", 2, 5, x3d);
+	qwtplot3d(x3d2 + n3d2, x3d2 + 2 * n3d2, x3d2 + 3 * n3d2, n3d2, "3D test #3", "-g", 2, 5, x3d2);
+
+
 
 	//goto end;
 	// ------------- create first plot: ---------------------
@@ -164,6 +169,16 @@ void createInfo() {
 		x3d[i + 3 * n3d] = i * 8. / ((double)(n3d));
 	}
 
+
+	x3d2 = new double[n3d2 * 4];
+	r = 8.;
+	for (i = 0; i < n3d2; i++) {
+		x3d2[i] = i * 0.1 * n3d/n3d2; //  time?
+		double a = i * 2. * 3.14159 * 0.8 / (double)(n3d2);
+		x3d2[i + n3d2] = sin(a) * r;
+		x3d2[i + 2 * n3d2] = cos(a) * r;
+		x3d2[i + 3 * n3d2] = 0.;
+	}
 }
 
 

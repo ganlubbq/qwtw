@@ -68,8 +68,12 @@ private:
 	std::map<QtDataVisualization::QScatter3DSeries*, LineItemInfo*> s;
 
 	QtDataVisualization::Q3DScatter* scatter;
+	bool selecting;
+	QtDataVisualization::QScatter3DSeries* activeSeries;
+
 	//QtDataVisualization::QScatterDataArray data;
 	private slots:
 	void onHome();
+
 
 };

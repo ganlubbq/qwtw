@@ -26,6 +26,7 @@ Q3DView::~Q3DView() {
 }
 
 int Q3DView::q3Init() {
+	selecting = false;  activeSeries = 0;
 	setWindowTitle("3D test !");
 	using namespace QtDataVisualization;
 	scatter = new Q3DScatter();
@@ -151,6 +152,7 @@ int Q3DView::q3Init() {
 	//	&Q3DView::changeFont);
 
 	//QObject::connect(this, &Q3DView::fontChanged, fontList, &QFontComboBox::setCurrentFont);
+	scatter->setCursor(Qt::ArrowCursor);
 
 	return 0;
 }
@@ -241,36 +243,58 @@ void Q3DView::onHome() {
 
 void Q3DView::selectedItemChanged(int index) {
 	using namespace QtDataVisualization;
-	QScatter3DSeries* series = (QScatter3DSeries*)sender();
+	if (selecting) {
+		return;
+	}
+	if (index == -1) {
+		return;
+	}
+	selecting = true;
+	QObject* obj = const_cast<QObject*>(sender());
+	if (obj == 0) {
+		selecting = false;
+		return;
+	}
+
+	//QScatter3DSeries* series = qobject_cast<QScatter3DSeries*>obj;
+	QScatter3DSeries* series = (QScatter3DSeries*)(obj);
+
 	if (series == 0) {
+		selecting = false;
 		return;
 	}
 	std::map<QScatter3DSeries*, LineItemInfo* >::iterator it = s.find(series);
 	if (it == s.end()) {
+		selecting = false;
 		return;
 	}
 	LineItemInfo* line = it->second;
 	if (line->size == 0) {
+		selecting = false;
 		return;
 	}
 	if (index >= line->size) {
+		selecting = false;
 		return;
 	}
 
 	emit onSelection(key);
 
-	char s[256];
-	sprintf(s, "[%.6f, %.6f, %.6f] (%lld points)", 
-		line->x[index], line->y[index], line->z[index], line->size);
-
+//	char s[256];
+//	sprintf(s, "[%.6f, %.6f, %.6f] (%d points)",  //  NOT %lld !!!!!!
+//		line->x[index], line->y[index], line->z[index], line->size);
+//
 	// setWindowTitle(s.str().c_str());
-	setWindowTitle(s);
+//	setWindowTitle(s);
 
+	activeSeries = series;
 	if (line->time != 0) {
 		pf->drawAllMarkers(line->time[index]);
 	}
 
 	pf->setAllMarkersVisible(true);
+	activeSeries = 0;
+	selecting = false;
 }
 
 void Q3DView::drawMarker(double t) {
@@ -281,7 +305,13 @@ void Q3DView::drawMarker(double t) {
 	while (it != s.end()) {
 		int i = it->second->ma.index;
 		if ((i >= 0) && (i < it->second->size)) {
-			it->first->setSelectedItem(i);
+			if ((selecting) /* && (it->first == activeSeries))*/) {
+
+			} else {
+				selecting = true;
+				it->first->setSelectedItem(i);
+				selecting = false;
+			}
 		}
 		
 		it++;
@@ -310,6 +340,37 @@ void Q3DView::addLine(LineItemInfo* line) {
 	
 	}
 	series->dataProxy()->resetArray(data);
+
+	QColor color = Qt::GlobalColor::darkGreen;
+
+	if (line->style == std::string()) {
+		//
+	} else {
+		int sn = line->style.size();
+
+		if (sn > 0) { //    last is always color:
+					  //  set color:
+			switch (line->style[sn - 1]) {
+			case 'r':  color = Qt::GlobalColor::red; break;
+			case 'd': color = Qt::darkRed;	break;
+			case 'k': color = Qt::black;  break;
+			case 'w': color = Qt::white;  break;
+			case 'g': color = Qt::green;  break;
+			case 'G': color = Qt::darkGreen;  break;
+			case 'm': color = Qt::magenta;   break;
+			case 'M': color = Qt::darkMagenta;  break;
+			case 'y': color = Qt::yellow;   break;
+			case 'Y': color = Qt::darkYellow;  break;
+			case 'b': color = Qt::blue;  break;
+			case 'c': color = Qt::cyan;  break;
+			case 'C': color = Qt::darkCyan;  break;
+			};
+		}
+	}
+
+
+	series->setBaseColor(color);
+
 	scatter->addSeries(series);
 
 
