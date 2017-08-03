@@ -504,7 +504,7 @@ void Figure2::addLine(LineItemInfo* line) {
 	plot1->updateAxes();
 	//zoomer->setZoomBase(true);
 	plot1->setAutoReplot(doReplot);
-	//plot1->replot();
+	plot1->replot();
 	zoomer->setZoomBase(false);
 }
 

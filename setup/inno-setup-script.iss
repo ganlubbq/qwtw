@@ -21,14 +21,15 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\qwtw
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-OutputBaseFilename=qwtwsetup-win-x64-1.0.2
+OutputBaseFilename=qwtwsetup-win-x64-1.0.3
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
 
 #define tch "vs2015-x64"
-#define boostver "1.62.0"
-#define qtver "5.7.0"
+;#define boostver "1.62.0"
+;#define qtver "5.7.0"
+#define marbleVer "16.12"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -39,21 +40,22 @@ Source: "{#SourcePath}..\lib-{#tch}\release\qwtwc.lib"; DestDir: "{app}"; Flags:
 Source: "{#SourcePath}..\qwtw\c_lib\qwtw_c.h"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "{#SourcePath}..\lib-{#tch}\release\qwtwc.dll"; DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
-Source: "{#SourcePath}..\lib-{#tch}\release\qwtwtest.exe"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
+Source: "{#SourcePath}..\lib-{#tch}\release\qwtwctest.exe"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
 
 Source: "{#SourcePath}vs-redist\{#tch}\*";   DestDir: "{commonappdata}/qwtw";    Check: Is64BitInstallMode;
 
-Source: "{#SourcePath}..\..\extlib\marble\1.11.3\{#tch}\bin\astro.dll"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags: 
-Source: "{#SourcePath}..\..\extlib\marble\1.11.3\{#tch}\bin\marblewidget-qt5.dll"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags: ignoreversion
-Source: "{#SourcePath}..\..\extlib\marble\1.11.3\data\*"; DestDir: "{commonappdata}/qwtw/marble-data";  Flags: ignoreversion    recursesubdirs
+Source: "{#SourcePath}..\..\extlib\marble\{#marbleVer}\{#tch}\bin\astro.dll"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags: 
+Source: "{#SourcePath}..\..\extlib\marble\{#marbleVer}\{#tch}\bin\marblewidget-qt5.dll"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags: ignoreversion
+Source: "{#SourcePath}..\..\extlib\marble\{#marbleVer}\data\*"; DestDir: "{commonappdata}/qwtw/marble-data";  Flags: ignoreversion    recursesubdirs
 
 ;Source: "{#SourcePath}..\..\extlib\openssl\1.1.0c\{#tch}\bin\*"; DestDir: "{commonappdata}/qwtw";      Flags: ignoreversion    recursesubdirs 
 Source: "{#SourcePath}..\..\extlib\openssl\1.0.2f\vs2013-x64\bin\*"; DestDir: "{commonappdata}/qwtw";      Flags: ignoreversion    recursesubdirs 
 
-Source: "{#SourcePath}..\..\extlib\boost\{#boostver}\{#tch}\*"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags:  recursesubdirs
-Source: "{#SourcePath}..\..\extlib\qt\{#qtver}\{#tch}\*"; DestDir: "{commonappdata}/qwtw";  Check: Is64BitInstallMode; Flags: recursesubdirs
+Source: "{#SourcePath}\boost-qt\*"; DestDir: "{commonappdata}/qwtw";  Check: Is64BitInstallMode; Flags:       recursesubdirs
+;Source: "{#SourcePath}..\..\extlib\boost\{#boostver}\{#tch}\*"; DestDir: "{commonappdata}/qwtw"; Check: Is64BitInstallMode; Flags:  recursesubdirs
+;Source: "{#SourcePath}..\..\extlib\qt\{#qtver}\{#tch}\*"; DestDir: "{commonappdata}/qwtw";  Check: Is64BitInstallMode; Flags: recursesubdirs
 
-Source: "{#SourcePath}..\..\extlib\qwt\6.1.4\{#tch}\bin\qwt.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
+Source: "{#SourcePath}..\..\extlib\qwt\trunk\{#tch}\bin\qwt.dll"; DestDir: "{commonappdata}/qwtw"; Flags: ignoreversion
 
 
 [Icons]
