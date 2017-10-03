@@ -38,6 +38,7 @@
     <file>../img/work1.png</file>
     <file>../img/work.png</file>
     <file>../img/zoom.png</file>
+    <file>../img/thunderstorm-icon.png</file>
   </qresource>
   <qresource prefix="cursors" >
     <file>hmove.cur</file>

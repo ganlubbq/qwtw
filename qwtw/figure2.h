@@ -125,7 +125,9 @@ public:
 	virtual void makeMarkersVisible(bool visible);
 	virtual void addLine(LineItemInfo* line);
 	virtual void onClip(double t1, double t2);
+
 	virtual void replot();
+
 
 	void setAxesEqual();
 
@@ -141,6 +143,7 @@ public:
 	QToolButton *tbFFT;
 	QToolButton *tbSquareAxis;
 	QToolButton* tbClip; 
+	QToolButton* tbResetLayout;
 
 	QToolButton* tbSavePicture;
 
@@ -180,6 +183,8 @@ protected:
 private slots:
 	void ontb1(bool checked );
 	void onClip(bool checked);
+	void onResetLayout();
+
 	void ontb2(bool checked );
 	void ontb3(bool checked );
 	void onSaveData();

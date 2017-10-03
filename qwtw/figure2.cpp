@@ -188,6 +188,7 @@ Figure2::Figure2(const std::string& key_, XQPlots* pf_, QWidget * parent) : Just
 	connect(tbFFT, SIGNAL(clicked()), this, SLOT(onTbFFT()));
 	connect(tbSquareAxis, SIGNAL(toggled(bool)), this, SLOT(onTbSquareAxis(bool)));
 	connect(tbClip, SIGNAL(toggled(bool)), this, SLOT(onClip(bool)));
+	connect(tbResetLayout, SIGNAL(clicked()), this, SLOT(onResetLayout()));
 
 	panner = new QwtPlotPanner(plot1->canvas());
     panner->setMouseButton(Qt::LeftButton);
@@ -280,6 +281,62 @@ void Figure2::ontb1(bool checked ) {  //   picker
 	}
 
 	setTBState(); 
+}
+
+void Figure2::onResetLayout() {
+	if (lines.empty()) {
+		return;
+	}
+
+	// do 'vertical scale':
+	double yMax = -BIGNUMBER, yMin = BIGNUMBER;
+	double xMax = -BIGNUMBER;
+	double xMin = BIGNUMBER;
+	bool ok = false;
+	int n = 0;
+	for (std::list<FigureItem*>::iterator it = lines.begin(); it != lines.end(); it++) {
+		FigureItem* fi = *it;
+		LineItemInfo* i = fi->info;
+		if (!i->important) {
+			continue;
+		}
+		n = i->size;
+
+		if (i->mode != 3) { //   'simple' line
+			if (xMax < i->x[n - 1]) xMax = i->x[n - 1];
+			if (xMin > i->x[0]) xMin = i->x[0];
+		} else { //  i->more == 3:  looks like a top view plot
+			if (i->time == 0) {
+				mxat(false);
+				continue;
+			}
+			for (long long k = 0; k < n; k++) {
+				if (xMax < i->x[k]) xMax = i->x[k];
+				if (xMin > i->x[k]) xMin = i->x[k];
+			}
+		}
+
+		for (long long k = 0; k < n; k++) {
+			if (yMax < i->y[k]) {
+				yMax = i->y[k];
+			}
+			if (yMin > i->y[k]) {
+				yMin = i->y[k];
+			}
+		}
+		ok = true;
+	}
+	//plt->setAxisScale(xAxis(), x1, x2);
+	//plot1->setAxisScale(plot1->xBottom, xMin, xMax);
+	//plot1->setAxisScale(plot1->yLeft, yMin, yMax);
+	if (!ok) {
+		return;
+	}
+
+	QRectF zr(xMin, yMin, xMax - xMin, yMax - yMin);
+	zoomer->zoom(zr);
+
+	plot1->replot(); // ?
 }
 
 void Figure2::onClip(bool checked) {
@@ -589,7 +646,13 @@ void Figure2::setupUi()     {
 	ui_addTBIcon(tbClip, ":/icons/img/wireframe.png");
 	tbClip->setCheckable(true);
 	horizontalLayout->addWidget(tbClip);
-	
+
+	tbResetLayout = new QToolButton(top_frame);
+	tbResetLayout->setToolTip("reset zooming");
+	tbResetLayout->setText("reset");
+	ui_addTBIcon(tbResetLayout, ":/icons/img/thunderstorm-icon.png");
+	//tbResetLayout->setCheckable(true);
+	horizontalLayout->addWidget(tbResetLayout);
 
     horizontalSpacer = new QSpacerItem(244, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -808,7 +871,7 @@ void Figure2::onPickerSignal(int x, int y) {
     //std::ostringstream s; 
     //s << xxm << ", " << yym << ", (" << mfi->info->legend << ")";
     char s[256];
-    sprintf(s, "%.6f, %.6f (%s)", xxm, yym, mfi->info->legend.c_str());
+    sprintf(s, "%.6f, %.6f (%s), index=%d", xxm, yym, mfi->info->legend.c_str(), minIndex);
 
    // setWindowTitle(s.str().c_str());
     setWindowTitle(s);
